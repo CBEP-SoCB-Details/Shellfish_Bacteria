@@ -34,7 +34,7 @@ be accessed by editing the URL for the 2018 data in the obvious way)
 But clicking on the 'Download" tabs from those pages did not work.
 
 We requested the historical P90 data from DMR via e-mail.  Curtis C. Bohlen 
-received an E-mail from Benjamin Wahle of DMR on November 26, 2019, containing 
+received an e-mail from Benjamin Wahle of DMR on November 26, 2019, containing 
 the following two files:
 
 "2016 p90 for CBEP.xlsx"
