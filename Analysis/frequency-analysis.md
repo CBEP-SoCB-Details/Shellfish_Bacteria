@@ -252,7 +252,7 @@ coli_data <- coli_data %>%
 
 We have some data that was selected for stations outside of Casco Bay.
 To be  
-careful, we remove sampling data for any site in th two adjacent Growing
+careful, we remove sampling data for any site in the two adjacent Growing
 Areas, “WH” and “WM”.
 
 ``` r
@@ -918,7 +918,7 @@ anova(imp_1000)
 ```
 
 The only version that shows a statistically robust response is the 1000
-meter model. The other s are not significant.
+meter model. The others are not significant.
 
 Now we run similar models on the square root of percent cover.
 
@@ -1251,7 +1251,7 @@ pp
 #> 4           2.329362           2.944315           3.822636           4.529399
 ```
 
-Then we convert from log odds to probabilities ob being below each
+Then we convert from log odds to probabilities on being below each
 threshold.
 
 ``` r
