@@ -525,7 +525,7 @@ Category = I was only used once.
 
 Current classification looks like it may be useful, but I’m not sure
 what to do with Current Classification =, which is almost al 2019 data,
-perhas because status has not been finalized yet?
+perhaps because status has not been finalized yet?
 
 ## Convert NNE wind direction to N
 
