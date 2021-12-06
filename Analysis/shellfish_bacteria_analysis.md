@@ -72,7 +72,7 @@ elevated bacteria levels. Here we follow a strategy used in looking at
 the Beaches data, of looking at several imperfect modeling strategies to
 examine patterns.
 
-Another notebook will directly address modeling of exceedences of
+Another notebook will directly address modeling of exceedances of
 relevant standards. Here we focus on site to site variation, and
 relationships to a few covariates.
 
@@ -595,7 +595,7 @@ We have a significant challenge here figuring out how to address or even
 display what are essentially thousands of pairwise comparisons. We use
 `emmeans()` as a convenient way to extract station by station estimates
 and standard errors. We use `type = 'response'` to generate estimated
-geometric means an 95% confidence intervals.
+geometric means a 95% confidence interval.
 
 ``` r
 emms <- summary(emmeans(test_lm, "Station", type = 'response')) %>%
@@ -689,7 +689,7 @@ rm(rain_lm_1, rain_lm_2, rain_lm_3, rain_lm_4, rain_lm_5)
 ```
 
 Rainfall is highly significant. The best single predictor is based on
-the previous day’s rainfall 9Model 2) adding the current day’s rainfall
+the previous day’s rainfall Model 2) adding the current day’s rainfall
 helps a bit more. Including the current day’s rainfall also helps. but
 the reduction in sums of squares.
 
@@ -814,7 +814,7 @@ We found, however, that the gamma GLM can not readily handle the log of
 our count data if we replace our non-detects by the value 1 (which is
 half the reporting limit). The reason, of course, is that `log(1) == 0`,
 and the canonical link function for a gamma GLM is the inverse, so the
-value of 1 returns an infinite link function, making teh GLM model
+value of 1 returns an infinite link function, making the GLM model
 unstable. Even when we replace `ND <- 1` with `ND <- 1.1`, the GLM has
 trouble fitting some fairly simple models.
 
@@ -889,7 +889,7 @@ plt +
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/plot_glm_emms_plus-1.png" style="display: block; margin: auto;" />
-So the the predicted values still match the observed geometric means.
+So the predicted values still match the observed geometric means.
 Note that these geometric means are slightly higher than the ones
 produced by fitting our non-detect corrected data, or fitting the
 version with non-detects scaled to half the nominal reporting limit,
