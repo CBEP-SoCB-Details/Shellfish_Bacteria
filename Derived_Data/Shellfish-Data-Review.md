@@ -146,7 +146,7 @@ the data as a check on the necessity for that.
 ## Convert Orders of Factors
 
 Since these are factors, and not ordered factors, this is merely to make
-it a bit easier to interpret results.It also has the effect of changing
+it a bit easier to interpret results. It also has the effect of changing
 the base category for contrasts. Note that this will not affect ordering
 of factors when data is loaded in from CSV files, so this code (or
 something very like it) will have to be run in any data analysis
@@ -282,7 +282,7 @@ with(raw_data, xtabs(~WDIR+factor(YEAR)))
     ##   NW    89  173  157   65   28
 
 Only “NW” was recorded in 2019. Most 2019 observations have no wind
-direction code. NNE was only used in 2016. Otherwoise, these data look
+direction code. NNE was only used in 2016. Otherwise, these data look
 inconsistent year to year, so they may not be all that useful for
 analysis.
 
