@@ -186,7 +186,7 @@ by looking for a less than sign (“&lt;”) in the original data. We could
 have alternatively looked at whether the raw col and coliscore values
 were identical.
 
-So lets go to the the trouble of reshaping our data the way we really
+So let's go to the the trouble of reshaping our data the way we really
 want.
 
 ``` r
@@ -339,8 +339,8 @@ The data is distributed approximately Pareto, so perhaps it could be
 modeled with a Pareto GLM (over a fixed support of perhaps 0:inf, or
 1:inf). The package VGAM supports such Pareto GLMs.
 
-It may be more appropriate to transform observations into exceedences of
-one or more thresholds, and analyze the probability of exceedences with
+It may be more appropriate to transform observations into exceedances of
+one or more thresholds, and analyze the probability of exceedances with
 a binomial or quasi-binomial GLM.
 
 A final alternative may be to use a one-dimensional PERMANOVA to analyze
@@ -411,7 +411,7 @@ interval.
 A “90 day interval” might apply to a summer’s worth of data, but in most
 years that will only represent a handful of observations at each site.
 Also note that this standard is written in terms of “enterococci”, not
-“fecal coliform or”coliformes".
+“fecal coliform" or ”coliforms".
 
 ## Evaluation
 
