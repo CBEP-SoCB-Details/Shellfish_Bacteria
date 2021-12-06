@@ -301,7 +301,7 @@ log-log plot. Other versions are close to linear. This property (shared
 with the Gamma distribution) suggests the Pareto may be a good bet for
 the bacteria data, which looks similar (if you ignore censoring).
 
-The Pareto distribution can be fit a several ways. First and second
+The Pareto distribution can be fit several ways. First and second
 moments have relatively simple closed form values, so parameters could
 be estimated using either the method of moments, or maximum likelihood
 methods.
