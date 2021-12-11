@@ -16,11 +16,11 @@ CSV table. Casco Bay Locations were selected by locating points within 500 m of
 the Casco Bay watershed layer, and resulting data was exported as a 
 shapefile (`Casco_Bay_Shellfish_p90_Locations`). 
 
-Although in principal such simple geographic search criteria could miss sites
+Although in principle such simple geographic search criteria could miss sites
 more than 1 KM from land, or pick up extra locations just outside the watershed, 
 the process appears to have worked (based on visual inspection).  We found only a 
 single Station Location not in the Growing Areas in Casco Bay.  We remove 
-those points from furthewr analysis, both in GIS, and in our R code.
+those points from further analysis, both in GIS, and in our R code.
 
 The first two characters of the Station ID represent the DMR Growing Area.  We
 calculated a GrowingArea Field based on that relationship.
@@ -53,7 +53,7 @@ following steps.
 4. We used "Aggregate" to reduce the resolution of the impervious cover raster
    to a 5 meter resolution, summing the total impervious cover within the
    5m x 5 m area, generating a raster with values from zero to 25. This
-   speeds later processing, an a negligable reduction in precision.
+   speeds later processing, with a negligible reduction in precision.
 
 5. We used "Focal Statistics" to generate rasters that show the cumulative area
    of impervious cover (in meters) within 100 m, 500 m, and 1000 m. 
@@ -62,7 +62,7 @@ following steps.
    polygons to a single multipolygon and added a dummy attribute with a value 
    of one.  We converted that to a raster, with a 5 meter pixel, and a value of 
    one everywhere there was land (Note that each pixel has value of one, but
-   covers 5m x 5m = 25 meters square, so this nreeds to be taken into account
+   covers 5m x 5m = 25 meters square, so this needs to be taken into account
    later.  
 
 7. We used "Focal Statistics" to generate rasters that show the cumulative sum
@@ -73,14 +73,14 @@ following steps.
    rasters produced in step 7 at each Station location. We used  'Extract 
    Multi Values to Points'. (variable names are imperv_[radius] and 
    land[_radius] respectively).  For IC, but not land cover, we replaced any 
-   null values with zeros, to account for points that lie more than the speficied 
+   null values with zeros, to account for points that lie more than the specified 
    distance from impervious cover using the field calculator.
 
 9. We calculated (two versions of) percent cover with the Field Calculator.   
    *   We divided the total impervious cover within the specified distance by the 
        area of the circle sampled under step (5) ($\pi \cdot r^2$).  
    *   We divided the total impervious cover within the specified distance by the 
-       estimated land area within each cirle, fo a percent impervious perunit land.
+       estimated land area within each circle, for a percent impervious per unit land.
        (Land area is 25 times the extracted value from the raster).  
    *   Variable names are pct_[radius] and pct_l_[radius], respectively for percent
        based on total area nad land area.  
