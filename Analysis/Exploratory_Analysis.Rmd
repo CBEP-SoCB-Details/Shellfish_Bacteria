@@ -18,7 +18,6 @@ knitr::opts_chunk$set(fig.align = 'center',
                       collapse = TRUE, comment = "#>")
 ```
 
-
 # Load Libraries
 ```{r}
 library(readr)
@@ -80,7 +79,7 @@ doing that for now, as we want to explore the structure of the data.
 ## What values are represented in our data?
 (Note that `ColiVal` has addressed inconsistent handling of non-detects, by
 rebuilding numeric data from the source.  `ColiVal` includes censored values.
-Censoring is shown with `LCFlag` and `RCFlag`).  We need to replace 
+Censoring is shown with `LCFlag` and `RCFlag`).
 
 ```{r fig.width = 7}
 test <- coli_data %>%
@@ -104,9 +103,11 @@ test$ColiVal[which(test$ColiVal <= 10)]
 
 ### Non-integer Values
 Non-integer values include the following:
+
 ```{r}
 test$ColiVal[which(test$ColiVal != as.integer(test$ColiVal))]
 ```
+
 These are discrete, low, non-integer values.  Presumably these reflect the
 possible numerical values derived from the methods used to estimate number
 of colony forming units in each water sample.
@@ -117,6 +118,7 @@ ggplot(coli_data, aes(SDateTime, ColiVal)) +
   geom_point(aes(color=LCFlag | RCFlag)) +
   scale_y_log10()
 ```
+
 This shows us:
 1.  The discrete of values observed
 2.  The importance of censoring
@@ -135,7 +137,8 @@ That may reflect the way we determined whether a sample was censored -- by
 looking for a less than sign ("<") in the original data.  We could have
 alternatively looked at whether the raw col and coliscore values were identical.
 
-So lets go to the the trouble of reshaping our data the way we really want.
+So let's go to the the trouble of reshaping our data the way we really want.
+
 ```{r}
 coli_data %>%
   filter(! is.na(ColiVal)) %>%
@@ -144,23 +147,28 @@ coli_data %>%
             .groups = 'drop') %>%
   ggplot(aes(YEAR, gmColi, color=GROW_AREA)) + geom_line(lwd=2)
 ```
-So, geometric means vary year to year and Growing Area to Growing Area.  WE
+
+So, geometric means vary year to year and Growing Area to Growing Area.  We
 obviously need indications of variability  to raw any conclusions, but this
 points in useful directions.
 
 ## Histograms
 First, a histogram of the log of the fecal coliform numbers. 
+
 ```{r}
 ggplot(coli_data, aes(log10(ColiVal))) +
   geom_histogram(aes(color=RCFlag | LCFlag), bins = 100)
 ```
+
 And then a log-log histogram. A Pareto random variable produces a linear
-relation on in a log-log histogram. 
+relation on in a log-log histogram.
+
 ```{r}
 ggplot(coli_data, aes(ColiVal)) +
   geom_histogram(aes(color=RCFlag | LCFlag), bins = 100) +
   scale_x_log10() + scale_y_log10()
 ```
+
 As suggested before, this is a strongly skewed, heavy-tailed distribution.
 So, Gamma, Exponential, and perhaps Pareto distributions might work, but that 
 nearly linear decline int eh histogram suggests a Pareto-style distribution
@@ -173,10 +181,11 @@ coli_data %>%
   correlate(method = 'spearman')
 ```
 
-So, no strong linear rank correlations.  Correlations are slightly lower using 
+So, no strong linear rank correlations.  Correlations are slightly lower using
 Pearson correlations.  Weak correlations with Temperature and Salinity and
-salinity and fecal coliform are likely meaningful.  Also, there may be non-linear
-relationships at play.  The salinity to year correlation is unexpected....
+salinity and fecal coliform are likely meaningful.  Also, there may be
+non-linear relationships at play.  The salinity to year correlation is
+unexpected....
 
 ```{r}
 coli_data %>% 
@@ -186,10 +195,10 @@ coli_data %>%
           progress=FALSE)
 ```
 
-So, data are very highly scattered, obscuring patterns even when the fecal coliform
-counts are log transformed. It appears fecal coliform Levels are weakly related to
-salinity and temperature, which are not especially correlated themselves.  The
-highly skewed fecal coliform data is problematic.
+So, data are very highly scattered, obscuring patterns even when the fecal
+coliform counts are log transformed. It appears fecal coliform Levels are weakly
+related to salinity and temperature, which are not especially correlated
+themselves.  The highly skewed fecal coliform data is problematic.
 
 ```{r}
 coli_data %>%
@@ -213,8 +222,8 @@ The data is distributed approximately Pareto, so perhaps it could be modeled
 with a Pareto GLM (over a fixed support of perhaps 0:inf, or 1:inf). The
 package VGAM supports such Pareto GLMs.
 
-It may be more appropriate to transform observations into exceedences of one or
-more thresholds, and analyze the probability of exceedences with a binomial
+It may be more appropriate to transform observations into exceedances of one or
+more thresholds, and analyze the probability of exceedances with a binomial
 or quasi-binomial GLM.
 
 A final alternative may be to use a one-dimensional PERMANOVA to analyze the
@@ -267,7 +276,6 @@ $<=14$ and  $<= 88$
 and for the p90
 $< 31$ and $<= 163$
 
-
 ## Maine State Class SB Waters Standards
 Maine's water quality criteria includes an additional standard, which applies
 only indirectly to these data:  
@@ -279,9 +287,8 @@ only indirectly to these data:
 
 A "90 day interval" might apply to a summer's worth of data, but in most years 
 that will only represent a handful of observations at each site. Also note that
-this standard is written in terms of "enterococci", not "fecal coliform or 
+this standard is written in terms of "enterococci", not "fecal coliform" or 
 "coliformes".
-
 
 ## Evaluation
 We can readily calculate a geometric mean for each site -- which is the basis on
@@ -289,7 +296,3 @@ which shellfish area closures are calculated -- but we can not readily model
 geometric means for this distribution.  The most straight forward way to do that
 would be to analyze the log of counts, but even the log of the raw data is
 highly skewed, and heavy tailed.
-
-
-
-

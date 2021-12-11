@@ -76,6 +76,7 @@ Right censored values are sufficiently rare as to be relatively unimportant
 we leave the undressed, but address left censored values.  Interval Censored 
 values add complexity, but are unlikely in our setting to sharply alter 
 qualitative conclusions, so we chose not to address them.
+
 ```{r}
 coli_data <- coli_data %>%
   mutate(ColiVal_2 = sub_cmeans(ColiVal, LCFlag))
@@ -87,13 +88,16 @@ ggplot(coli_data, aes(x = ColiVal, y = ColiVal_2, color = LCFlag)) +
   xlim(0,25) +
   ylim(0,25)
 ```
-Almost all censored values were at 2
+
+Almost all censored values were at 2.
+
 ```{r}
 coli_data %>%
   filter(ColiVal == 2, LCFlag) %>%
   pull(ColiVal_2) %>%
   summary
 ```
+
 So, our (lognormal) based estimator for censored values estimates a non-detect 
 at somewhere around 0.61 CF per 100 ml.  
 
@@ -108,14 +112,16 @@ The data is so highly skewed that even the logs are skewed, which suggests we
 may have a hard time finding a parametric way of analyzing these data.
 
 Given the non-detects and censored upper values, we can consider 
-1. Fitting data to a parametric family of distributions, accounting for censoring
-2. Robust or resistant statistical methods
-3. Non-parametric methods 
-
+1. Fitting data to a parametric family of distributions, accounting for
+   censoring  
+2. Robust or resistant statistical methods  
+3. Non-parametric methods   
 
 ## Analytic Graphics
-The package 'fitdistrplus' provides functions for fitting standard as well as non-standard distributions both with and without censored data.  We test it 
+The package 'fitdistrplus' provides functions for fitting standard as well as
+non-standard distributions both with and without censored data.  We test it
 first without accounting for censoring.
+
 ```{r}
 test_dat <- coli_data %>%
   filter(! is.na(ColiVal)) %>%
@@ -126,9 +132,11 @@ plotdist(test_dat$ColiVal, histo = TRUE, demp = TRUE)
 The package contains and interesting function that provides a graphical
 representation of data in terms of kurtosis and skewness.  The output is helpful
 for evaluating potential alternative data distributions.
+
 ```{r}
 descdist(test_dat$ColiVal, boot = 1000)
 ```
+
 That plot confirms that the data has heavier tails than either lognormal or
 gamma distributions  A Beta distribution is not appropriate, since Beta variates
 are bounded between zero and one.  We need a highly skewed, heavy-tailed
@@ -137,7 +145,8 @@ distribution with a support on the positive real line.
 ```{r}
 descdist(log(test_dat$ColiVal), boot = 1000)
 ```
-even log-transformed data is problematic to model. It is significantly more skew
+
+Even log-transformed data is problematic to model. It is significantly more skew
 than an exponential or gamma distribution.
 
 ## Gamma Distribution
@@ -146,20 +155,21 @@ Scale = $\theta$.  The mean and variance are as follows:
 $$\mu=\alpha\theta$$
 $$\sigma^2 = \alpha \theta^2$$
 
-
 The estimates of the parameters therefore are:
 $$\theta = \alpha ^ 2 /μ$$
-
 
 $$\alpha = \mu / \theta= \mu^2 / \sigma^2$$
 
 The empirical moments are:
+
 ```{r}
 (a <- with(coli_data, list(mean=mean(ColiVal_2, na.rm=TRUE),
                            var=var(ColiVal_2, na.rm=TRUE))))
 ```
 
-So, by the method of moments, we can examine a gamma distribution with the following parameters:
+So, by the method of moments, we can examine a gamma distribution with the 
+following parameters:
+
 ```{r}
 (theta = a$var/a$mean)
 (alpha = a$mean/theta)
@@ -182,14 +192,12 @@ are close to linear.  This property (shared with the Gamma distribution)
 suggests the Pareto may be a good bet for the bacteria data, which looks similar 
 (if you ignore censoring).
 
-The Pareto distribution can be fit a several ways.  First and second moments 
+The Pareto distribution can be fit several ways.  First and second moments 
 have relatively simple closed form values, so parameters could be estimated 
 using either the method of moments, or maximum likelihood methods.
 
-
 ###  Means and Variances
 #### Mean
-
 $$E(x) = \frac{\sigma}{\alpha - 1} + \mu $$
 
 Where parameters are: 
@@ -242,6 +250,7 @@ was essentially arbitrary.
 Here's an example showing the correspondence. Note the linear decline on a 
 log-log plot.  That linear decline is only an identity for a pareto(I)
 distribution.
+
 ```{r fig.height = 3, fig.width = 4}
 ggplot() +
   scale_x_log10(limits = c(0.1,100)) +
@@ -252,7 +261,6 @@ geom_function(fun = dparetoII,
                 args = list(location = 2, scale = 2, shape = .5 ), 
               color = 'red',
               lty = 2, size = 1)
-
 ```
 
 The important distinction is to realize that `paretoII()` has more flexibility
@@ -283,8 +291,8 @@ ggplot() +
                  args = list(location = 0, scale = 10, shape = 1),
                  color = 'black')
 ```
-So, as SCALE goes up, low values drop, mid and higher values rise.
 
+So, as SCALE goes up, low values drop, mid and higher values rise.
 
 ```{r pareto_shape_demo, fig.width = 4, fig.height = 3}
 ggplot() +
@@ -306,6 +314,7 @@ ggplot() +
                  args = list(location = 0,  scale = 5, shape = 5),
                  color = 'black')
 ```
+
 The SHAPE parameter has to do with how closely the distribution hugs towards
 the "origin" -- more correctly the location parameter, which is the minimum. 
 
@@ -327,6 +336,7 @@ moments can be found here:
 Here is the simple function to estimate parameters for a Pareto(I) distribution.
 (for non-censored data).  It is from the StackExchange answer referenced above.
 The first parameter here is a minimum value, the second, a shape parameter.
+
 ```{r}
 pareto.MLE <- function(X)
 {
@@ -385,6 +395,7 @@ could go with the median and the 90th percentile.
 
 But note : (1) This does not work with `ColiVal_2`, only with `ColiVal`, and 
 (2) resulting parameter estimates look quite different.
+
 ```{r}
 f_qme <- fitdist(test_dat$ColiVal, "paretoII",
                  method='qme', 
@@ -394,6 +405,7 @@ f_qme <- fitdist(test_dat$ColiVal, "paretoII",
 cat('\n')
 (fd_parms_alt <- f_qme$estimate[c(2,1)])
 ```
+
 The parameters LOOK quite different from the prior estimate, which is troubling.
 
 ### Compare Fits
@@ -429,9 +441,9 @@ ggplot(coli_data, aes(ColiVal_2)) +
                 color = 'green')
 ```
 
-All the different Pareto distribution fits are similar.  Two are effectively 
-identical. One lesson is that apparent differences in parameters may have little effect
-on the real distribution of probability mass density. 
+All the different Pareto distribution fits are similar. Two are effectively
+identical. One lesson is that apparent differences in parameters may have little
+effect on the real distribution of probability mass density.
 
 The gamma distribution (orange) is lower, and has significant mass at low 
 (below 1) values.
@@ -470,6 +482,7 @@ We use the `pareto2` family of functions from `actuar`, rather than the
 `paretoII()` functions from `VGAM`, because `actuar` includes a defined moment 
 function, `mpareto2()`, and quantile function, `qpareto2()`.  Those functions
 are required for several of the alternative fitting algorithms in `fitdistplus`.
+
 ```{r error = TRUE}
 ff <- fitdistcens(data.frame(cens_data), "pareto2",
                  start = list(shape=1, scale= 1),
@@ -521,6 +534,7 @@ fit to the median and 90th percentile.
 These don't work very well for these estimated sets of parameters because
 estimated parameters are low enough so both the mean and the variance of the
 fitted Pareto distribution are unbounded.
+
 ```{r}
 est_pareto_mean <- function(scale, shape, location){
   if_else(shape > 1,
@@ -534,7 +548,6 @@ est_pareto_variance <- function(scale, shape, location){
                   Inf),
           NaN)
 }
-
 ```
 
 #### Maximum Likelihood
@@ -543,6 +556,7 @@ fd_parms
 est_pareto_mean(fd_parms[[1]], fd_parms[[2]], 0.5)
 est_pareto_variance(fd_parms[[1]], fd_parms[[2]], 0.5)
 ```
+
 # Quantile matching
 ```{r}
 fd_parms_alt
@@ -550,7 +564,6 @@ est_pareto_mean(fd_parms_alt[[1]], fd_parms_alt[[2]], 0.5)
 est_pareto_variance(fd_parms_alt[[1]], fd_parms_alt[[2]], 0.5)
 ```
 # Maximum Likelihood with Censored Data
-
 ```{r}
 cens_parms
 est_pareto_mean(cens_parms[[1]], cens_parms[[2]], 0.5)
@@ -564,5 +577,3 @@ and results difficult to interpret, as there is no simple relationship between
 parameters and simple summary statistics.  Further, fitted parameters are 
 strongly influenced by analytic choices, such as selecting which version of the
 Pareto distribution to fit, and setting the Location parameter.
-
-

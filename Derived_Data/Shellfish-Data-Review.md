@@ -41,10 +41,12 @@ library(tidyverse)
 
     ## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
 
-    ## v ggplot2 3.3.3     v dplyr   1.0.6
-    ## v tibble  3.1.2     v stringr 1.4.0
-    ## v tidyr   1.1.3     v forcats 0.5.1
+    ## v ggplot2 3.3.5     v dplyr   1.0.7
+    ## v tibble  3.1.6     v stringr 1.4.0
+    ## v tidyr   1.1.4     v forcats 0.5.1
     ## v purrr   0.3.4
+
+    ## Warning: package 'ggplot2' was built under R version 4.0.5
 
     ## Warning: package 'tidyr' was built under R version 4.0.5
 
@@ -117,7 +119,10 @@ raw_data <- read_csv(path,
   mutate(MONTH = as.numeric(format(EFFORT_START_DATE, '%m')))
 ```
 
-    ## Warning: Missing column names filled in: 'X1' [1]
+    ## New names:
+    ## * `` -> ...1
+
+    ## Warning: The following named parsers don't match the column names: X1
 
 ``` r
 with(raw_data, xtabs(~factor(format(EFFORT_START_DATE, '%m')) +factor(YEAR)))
@@ -146,7 +151,7 @@ the data as a check on the necessity for that.
 ## Convert Orders of Factors
 
 Since these are factors, and not ordered factors, this is merely to make
-it a bit easier to interpret results.It also has the effect of changing
+it a bit easier to interpret results. It also has the effect of changing
 the base category for contrasts. Note that this will not affect ordering
 of factors when data is loaded in from CSV files, so this code (or
 something very like it) will have to be run in any data analysis
@@ -209,16 +214,16 @@ we found in the p90 files.
 names(raw_data)
 ```
 
-    ##  [1] "EFFORT_START_DATE"           "EFFORT_START_TIME"          
-    ##  [3] "START_DATE_TIME"             "LOCATION_ID"                
-    ##  [5] "GROWING_AREA"                "OPEN_CLOSED_FLAG"           
-    ##  [7] "WIND_DIRECTION"              "TIDE_STAGE"                 
-    ##  [9] "CURRENT_CLASSIFICATION_CODE" "CATEGORY"                   
-    ## [11] "TEMP_C"                      "FLOOD"                      
-    ## [13] "SALINITY_PCT"                "COL_SCORE"                  
-    ## [15] "RAW_COL_SCORE"               "DELIVERY_TEMP_C"            
-    ## [17] "YEAR"                        "DOY"                        
-    ## [19] "MONTH"
+    ##  [1] "...1"                        "EFFORT_START_DATE"          
+    ##  [3] "EFFORT_START_TIME"           "START_DATE_TIME"            
+    ##  [5] "LOCATION_ID"                 "GROWING_AREA"               
+    ##  [7] "OPEN_CLOSED_FLAG"            "WIND_DIRECTION"             
+    ##  [9] "TIDE_STAGE"                  "CURRENT_CLASSIFICATION_CODE"
+    ## [11] "CATEGORY"                    "TEMP_C"                     
+    ## [13] "FLOOD"                       "SALINITY_PCT"               
+    ## [15] "COL_SCORE"                   "RAW_COL_SCORE"              
+    ## [17] "DELIVERY_TEMP_C"             "YEAR"                       
+    ## [19] "DOY"                         "MONTH"
 
 ``` r
 raw_data <- raw_data %>%
@@ -282,7 +287,7 @@ with(raw_data, xtabs(~WDIR+factor(YEAR)))
     ##   NW    89  173  157   65   28
 
 Only “NW” was recorded in 2019. Most 2019 observations have no wind
-direction code. NNE was only used in 2016. Otherwoise, these data look
+direction code. NNE was only used in 2016. Otherwise, these data look
 inconsistent year to year, so they may not be all that useful for
 analysis.
 
@@ -359,9 +364,8 @@ ggplot(the_data, aes(ColiVal, ColiScore)) +
 So, here we see a couple of things:
 
 1.  DMR replaced “raw” observations with arbitrary larger or smaller
-    values when they produced the `"`ColiScore\` values. We may be able
-    to do better, or handle these censored data with more
-    sophistication.
+    values when they produced the `ColiScore` values. We may be able to
+    do better, or handle these censored data with more sophistication.
 
 2.  There’s a strange observation or group of observations that was
     recorded as &lt; something that is well above the nominal detection

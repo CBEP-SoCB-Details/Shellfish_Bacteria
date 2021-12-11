@@ -77,10 +77,11 @@ library(readr)
 library(tidyverse)      # Loads another `select()`
 #> Warning: package 'tidyverse' was built under R version 4.0.5
 #> -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
-#> v ggplot2 3.3.3     v dplyr   1.0.6
-#> v tibble  3.1.2     v stringr 1.4.0
-#> v tidyr   1.1.3     v forcats 0.5.1
+#> v ggplot2 3.3.5     v dplyr   1.0.7
+#> v tibble  3.1.6     v stringr 1.4.0
+#> v tidyr   1.1.4     v forcats 0.5.1
 #> v purrr   0.3.4
+#> Warning: package 'ggplot2' was built under R version 4.0.5
 #> Warning: package 'tidyr' was built under R version 4.0.5
 #> Warning: package 'dplyr' was built under R version 4.0.5
 #> Warning: package 'forcats' was built under R version 4.0.5
@@ -89,6 +90,7 @@ library(tidyverse)      # Loads another `select()`
 #> x dplyr::lag()    masks stats::lag()
 
 library(emmeans)        # For marginal means
+#> Warning: package 'emmeans' was built under R version 4.0.5
 library(mgcv)           # For GAMs, here used principally for hierarchical models
 #> Warning: package 'mgcv' was built under R version 4.0.5
 #> Loading required package: nlme
@@ -97,7 +99,7 @@ library(mgcv)           # For GAMs, here used principally for hierarchical model
 #> The following object is masked from 'package:dplyr':
 #> 
 #>     collapse
-#> This is mgcv 1.8-35. For overview type 'help("mgcv-package")'.
+#> This is mgcv 1.8-38. For overview type 'help("mgcv-package")'.
 
 library(CBEPgraphics)
 load_cbep_fonts()
@@ -453,16 +455,20 @@ So just about 20% of sites fail the p90 “Accepted” threshold.
 
 ``` r
 long_dat <- sum_data %>%
-  select(Station, gmean1, gm_lower1, gm_upper1, p901, p90_lower1, p90_upper1) %>%
+  select(Station, gmean1, gm_lower1, gm_upper1,
+         p901, p90_lower1, p90_upper1) %>%
   rename(gm_value = gmean1, p90_value = p901) %>%
   rename_with( ~sub('1', '', .x)) %>%
   pivot_longer(gm_value:p90_upper,
                names_to = c('parameter', 'type'), 
                names_sep = '_') %>%
-  pivot_wider(c(Station, parameter), names_from = type, values_from = value) %>%
+  pivot_wider(c(Station, parameter), 
+              names_from = type, 
+              values_from = value) %>%
   mutate(parameter = factor(parameter, 
                             levels = c('gm', 'p90'), 
-                            labels = c('Geometric Mean', '90th Percentile'))) %>%
+                            labels = c('Geometric Mean', 
+                                       '90th Percentile'))) %>%
   arrange(parameter, Station)
 ```
 

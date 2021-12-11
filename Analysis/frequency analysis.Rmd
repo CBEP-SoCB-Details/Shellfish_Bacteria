@@ -124,6 +124,7 @@ coli_data <- coli_data %>%
 
 ## Weather Data
 We simplify the weather data somewhat.
+
 ```{r load_weather_data}
 sibfldnm    <- 'Original_Data'
 parent      <- dirname(getwd())
@@ -179,8 +180,9 @@ coli_data <- coli_data %>%
 
 ## Remove Sites not in Region
 We have some data that was selected for stations outside of Casco Bay. To be  
-careful, we  remove sampling data for any site in th two adjacent Growing Areas,
+careful, we  remove sampling data for any site in the two adjacent Growing Areas,
 "WH" and "WM".
+
 ```{r remove_outside_region}
 coli_data <- coli_data %>%
   filter(grow_area != 'WH' & grow_area != "WM") %>%
@@ -194,11 +196,11 @@ thresholds.  Then they are combined to produce three multinomial ordered
 factors.
 
 The key thresholds are these:
+
 ```{r limits_list}
 coli_limits <- list(open = 0,   gmrelay=14,    p90relay=31, 
                     gmclosed=88, p90closed=163, high= 50000)
 ```
-
 
 We create a data frame containing a number of binomial and multinomial 
 responses.  
@@ -235,7 +237,6 @@ freq_data <- coli_data %>%
 freq_data <- freq_data %>% 
   select(-coliscore, -rawcoli, -lcflag, -rcflag, -colival)
 ```
-
 
 ## Raw Station Probabilitiies
 We want to be able to compare the results of modeling to observed relative
@@ -288,6 +289,7 @@ fpath <- file.path(sibling, fn)
 imperv_data <- read_csv(fpath) %>%
   select(Station, pct_1000, pct_500, pct_100, pct_l_1000, pct_l_500, pct_l_100)
 ```
+
 ```{r join_impervious_data}
 freq_data <- freq_data %>%
   mutate(s = as.character(station)) %>%
@@ -314,9 +316,9 @@ freq_data %>% select(month, all_lvls) %>%
   ggpairs(aes(month, all_lvls)) 
 ```
 
-1. Most observations are from summer months
-2. Most observations are lower than all our cut points
-3. Probability of exceedences appears slightly higher in summer months.
+1. Most observations are from summer months  
+2. Most observations are lower than all our cut points  
+3. Probability of exceedences appears slightly higher in summer months.  
 
 ```{r freq_bar_all}
 freq_data %>%
@@ -328,6 +330,7 @@ freq_data %>%
 
 The following is the equivalent of 1- p(anything better than P90_relay) in the 
 prior graphic.
+
 ```{r freq_bar_simple}
 freq_data %>%
   count(month, p90_open) %>%
@@ -341,6 +344,7 @@ The coefficients of a binomial or multinomial GLM are actually the logit (log
 odds) of the probabilities we are interested in, so a couple of utility
 functions may come in handy. These are probably not the most numerically stable
 versions of these functions for extreme values, but they work.
+
 ```{r functions}
 logit <- function(p) {log(p)-log(1-p)}
 inv_logit <- function(x) {1/(1+exp(-x))}
@@ -348,6 +352,7 @@ inv_logit <- function(x) {1/(1+exp(-x))}
 
 # Cleanup
 We remove unnecessary data frames to free memory for calculations.
+
 ```{r cleanup_1}
 rm(coli_data, coli_limits, weather_data)
 ```
@@ -371,10 +376,10 @@ rarely that we run into problems with modeling.
 It is less clear how we would relate the probability of violating the Geometric
 Mean standards to our models.  
 
-
 ### Station Only
 We start with a simple model looking only at stations. The probability of 
 failing a standard may be an appropriate way to symbolize stations in GIS.
+
 ```{r station_glm}
 system.time(p90_open_glm_1 <- glm(p90_open  ~ station,
              data = freq_data,
@@ -386,6 +391,7 @@ anova(p90_open_glm_1, test='LRT')
 ```
 
 By the LRT, differences among station are highly significant.
+
 ```{r station_glm_graphic}
 p_res <- summary(emmeans(p90_open_glm_1, "station", 
                         type = 'response')) %>%
@@ -408,6 +414,7 @@ plot(p_res) +
   xlab('Probability of Meeting\nP90 Standard' )
 
 ```
+
 Many sites show unstable standard errors, as they were never observed with 
 a sample that failed the standard, triggering a Hauke-Donner effect.  That
 makes estimation of parameters and standard errors effectively impossible for 
@@ -424,6 +431,7 @@ ggplot(tmp, aes(p_p90_open, prob)) +
     scale_x_continuous(limits = c(.5,1)) +
     scale_y_continuous(limits = c(.5,1))
 ```
+
 In a simple model, the predictions match the observed relative frequencies and
 the standard errors behave as expected (wider near the middle of a binomial 
 distribution, narrower and asymmetrical near the limits).
@@ -433,6 +441,7 @@ For more complex models, we treat Stations as random factors, using the `gam()`
 function, which can fit random factors using a smoothing term with basis 
 designated as `bs = 're'`.  This helps protect against making claims on the 
 basis of the specific stations from which data are available.
+
 ```{r region_model, cache = TRUE}
 system.time(
   p90_open_gam_regions <- gam(p90_open  ~ grow_area + s(station, bs = 're'),
@@ -444,6 +453,7 @@ system.time(
 ```{r}
 anova(p90_open_gam_regions, test='LRT')
 ```
+
 By the LRT, differences among regions are highly significant, as expected.
 
 ```{r region_draft_graphic}
@@ -472,7 +482,6 @@ plt <- ggplot(p_res, aes(grow_area, prob)) +
   xlab('Maine DMR Growing Area') +
 
   theme_cbep(base_size = 12)
-
 plt
 ```
 
@@ -496,7 +505,6 @@ mm <- emmeans(p90_open_gam_months, "month", type = 'response')
 mms <- summary(mm)  # Summary has class dataframe, making access and display easier.
 ```
 
-
 #### Draft Graphic
 We have a problem here, as Stations are not contained "within" months, so sites
 are not uniquely attributable to them.  Accordingly, we can not use the strategy
@@ -512,11 +520,8 @@ plt <- ggplot(mms, aes(month, prob)) +
   xlab('') + 
   ylab(expression(atop('Probability of Meeting', 
                            'P90 ' ~ 'Fecal Coliforms' ~ ' Standard'))) +
-  
   ylim(0.75, 1.0) +
-
   theme_cbep(base_size = 12)
-
 plt
 ```
 
@@ -549,7 +554,6 @@ at the extremes.
 summary(p90_open_gam_rain)
 ```
 
-
 ```{r plot_rainfall_gam}
 plot(p90_open_gam_rain)
 ```
@@ -562,6 +566,7 @@ risk.
 #### Exploratory Graphic
 We display the horizontal axis using a square root transform, which is may
 stabilize the variation of a percentage.  
+
 ```{r imperv_expl_grap, fig.width  = 7}
 rawprobs %>%
   select(p_p90_open, starts_with('pct_')) %>%
@@ -583,7 +588,6 @@ Intellectually, I prefer the land based IC values.  There is no great way to
 decide which range makes the most sense.  A full km (1000 m) feels like a long 
 way on the narrow peninsulas of the Eastern Bay.
 
-
 #### Models
 Here, we need to model each station, since risk is a station by station
 property.  We could treat Stations as either random or fixed factors, but it is
@@ -593,6 +597,7 @@ factors.
 
 We run all three distances, using land-based percent cover estimates. First,
 with untransformed percent cover values.
+
 ```{r imperv_models_1, cache = TRUE}
 system.time(imp_100 <- gam(p90_open ~ pct_l_100 + s(station, bs = 're'),
              data = freq_data,
@@ -614,9 +619,10 @@ anova(imp_1000)
 ```
 
 The only version that shows a statistically robust response is the 1000 meter 
-model.  The other s are not significant.
+model.  The others are not significant.
 
 Now we run similar models on the square root of percent cover.
+
 ```{r imperv_models_2, cache = TRUE}
 system.time(imp_100_t <- gam(p90_open ~ sqrt(pct_l_100) + s(station, bs = 're'),
              data = freq_data,
@@ -629,8 +635,6 @@ system.time(imp_1000_t <- gam(p90_open ~ sqrt(pct_l_1000) + s(station, bs = 're'
              family=binomial(link=logit)))
 ```
 
-
-
 ```{r}
 anova(imp_100_t)
 cat('\n\n')
@@ -642,11 +646,13 @@ anova(imp_1000_t)
 Again, only the 1000 meter version shows significant patterns with land use. The
 square root transform makes almost no difference regarding the adequacy of 
 the fit.
+
 ```{r}
 anova(imp_1000, imp_1000_t)
 ```
 
 We continue with the untransformed model, as easier to explain to our audience.
+
 ```{r}
 summary(imp_1000)
 ```
@@ -673,14 +679,12 @@ rawprobs %>%
   xlab('Percent Impervious, 1000 m') +
   ylab('Prob. Meeting P90 Standard') +
   theme_cbep(base_size= 12)
-
-
 ```
+
 So, the relationship is statistically significant, but not especially striking 
 or robust.  There is a lot of scatter, and the trend is driven mostly by (a) the
 frequency of sites that never see bad water quality, and (b) a handful of sites
 with high imperviousness.
-
 
 #### Cleanup
 ```{r}
@@ -717,6 +721,7 @@ bogged down with high memory usage.
 ##### Basic Model
 The parameter `parallel = TRUE` in the family function sets this up as a
 proportional odds model.  The cutpoints for all regions are proportional.
+
 ```{r basic_vglm_region}
 system.time(
   pom_region <- vglm(all_lvls ~ grow_area,
@@ -775,14 +780,16 @@ We can look at predicted (conditional) probabilities. We work through the logic
 of the models, to clarify the structure of the model predictions.
 
 First, we calculate the log odds ratios. This is the linear predictor generated
-by hte model. These are log odds of being below each "cutpoint." 
+by the model. These are log odds of being below each "cutpoint." 
+
 ```{r log_odds}
 pp <- predict(pom_region, 
               newdata = data.frame(grow_area = c('WI', 'WJ', 'WK', 'WL')))
 pp
 ```
 
-Then we convert from log odds to probabilities ob being below each threshold.
+Then we convert from log odds to probabilities of being below each threshold.
+
 ```{r prob_below_thresholds}
 pp <- inv_logit(pp)
 colnames(pp) <- c('p[<=1]', 'p[<=2]', 'p[<=3]', 'p[<=5]')
@@ -792,6 +799,7 @@ pp
 
 And finally, we find the differences between successive threshold
 probabilities to generate probabilities of observing each outcome.
+
 ```{r probabilities}
 pp <- cbind(pp, 1)
 ppp <- pp
@@ -807,6 +815,7 @@ parameter `type = 'response'`.
 
 We use that to look at results from the complete odds model, which are nearly
 identical, as suggested by the very similar AIC values we calculated before.
+
 ```{r probabilities_alt}
 pp <- predict(om_region, 
               newdata = data.frame(grow_area = c('WI', 'WJ', 'WK', 'WL')),
@@ -818,14 +827,15 @@ pp
 We can fit the same model using the `polr()` function from `MASS`. The primary 
 difference are:  
 1.  `polr()` can not fit the non-proportional odds model we fit as an alternate
-    in `vglm()`.
+    in `vglm()`.  
 2.  `polr()` parameterizes the model in a different  way, so the model
-    parameters are the negative of what was generated in `vglm()`.
+    parameters are the negative of what was generated in `vglm()`.  
 3.  `MASS` provides the  option of producing predicted probabilities with the 
     `type = 'p'` parameter to the 'predict.polr()` function, rather than the 
-    `type = 'response'` parameter used by `VGAM`.
+    `type = 'response'` parameter used by `VGAM`.  
 4.  `vglm()` has many more models and alternate forms for presenting the data,
     making it both more flexible, and easier to misapply.
+    
 ```{r mass_polr}
 system.time(
   polr_region <- polr(all_lvls ~ grow_area,
@@ -833,11 +843,14 @@ system.time(
                     method = "logistic")
 )
 ```
+
 ```{r}
 summary(polr_region)
 ```
+
 MASS provides an option of predicting the probabilities with the `type = 'p'`
 parameter to the 'predict.polr()` function.
+
 ```{r probabilities_polr}
 pp <- predict(polr_region, 
               newdata = data.frame(grow_area = c('WI', 'WJ', 'WK', 'WL')),
@@ -846,7 +859,7 @@ pp
 ```
 
 ### Rainfall Models
-We continue examing models of the impact of 
+We continue by examining models of the impact of precipitation
 #### Full model
 ```{r rainfall_pom}
 system.time(
@@ -857,9 +870,11 @@ system.time(
                                          reverse = FALSE))
 )
 ```
+
 ```{r}
 summary(pom_rain)
 ```
+
 #### Simplified Model
 ```{r rainfall_pom_alt}
 system.time(
@@ -875,6 +890,7 @@ system.time(
 AIC(pom_rain)
 AIC(pom_rain_2)
 ```
+
 So the full model is preferable.
 
 ```{r}
@@ -946,7 +962,6 @@ min(rain_df$open)/ (1- min(rain_df$open))
 
 Of course, those odds are across all samples, and conditions at some individual
 station will be worse.  Conversely, many station never fail standards.
-
 
 # Further Questions
 More complex models (region by rainfall, site by rainfall, weighted rainfall

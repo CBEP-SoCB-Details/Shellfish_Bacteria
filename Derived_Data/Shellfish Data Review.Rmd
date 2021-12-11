@@ -36,6 +36,7 @@ fn<- "Casco Bay WQ 15.19.csv"
 ## Read Data
 Most of this code is to skip data columns that were used for data QA/QC, or to 
 ensure dates and times are properly interpreted.
+
 ```{r}
 path <- file.path(sibling, fn)
 raw_data <- read_csv(path, 
@@ -92,7 +93,7 @@ on the necessity for that.
 
 ## Convert Orders of Factors
 Since these are factors, and not ordered factors, this is merely to make it a
-bit easier to interpret results.It also has the effect of changing the base
+bit easier to interpret results. It also has the effect of changing the base
 category for contrasts.  Note that this will not affect ordering of factors when
 data is loaded in from CSV files, so this code (or something very like it) will
 have to be run in any data analysis scripts.
@@ -124,6 +125,7 @@ raw_data <- raw_data %>%
 Data names from DMR are long, in all caps, and awkward, so we want to simplify.
 While we are at it, we want names to more or less match what we found in the p90
 files.
+
 ```{r}
 names(raw_data)
 ```
@@ -159,7 +161,7 @@ with(raw_data, levels(WDIR))
 with(raw_data, xtabs(~WDIR+factor(YEAR)))
 ```
 Only "NW" was recorded in 2019. Most 2019 observations have no wind direction
-code. NNE was only used in 2016. Otherwoise, these data look inconsistent year
+code. NNE was only used in 2016. Otherwise, these data look inconsistent year
 to year, so they may not be all that useful for analysis.
 
 ```{r}
@@ -167,6 +169,7 @@ with(raw_data, xtabs(~OpenClosed+CATEGORY))
 ```
 
 So CATEGORY contains no useful information for us.
+
 ```{r}
 with(raw_data, xtabs(~OpenClosed+Class))
 ```
@@ -181,6 +184,7 @@ of the sample.  We should be able to determine that based on the data itself.
 ## Remove Unreliable / Uninformative Categories
 This code removes uninformative or inconsistent data and replaces "X" values
 with NA.
+
 ```{r}
 raw_data<-raw_data %>%
   select(-CATEGORY, -WDIR) %>%
@@ -216,7 +220,7 @@ ggplot(the_data, aes(ColiVal, ColiScore)) +
 So, here we see a couple of things:
 
 1. DMR replaced "raw" observations with arbitrary larger or smaller values when
-   they produced the `"`ColiScore` values.  We may be able to do better, or
+   they produced the `ColiScore` values.  We may be able to do better, or
    handle these censored data with more sophistication.
    
 2. There's a strange observation or group of observations that was recorded as
@@ -240,10 +244,11 @@ filter(ColiScore<2) %>%
   select(SDate, ColiScore, RawColi, ColiVal, LCFlag)
 ```
 
-Those anomalous entries come almost entirely from one day.  Our guess is that the
-detection limit for the method used does not vary, and so, these observations
-were incorrectly recorded. Luckily, the apparent inconsistencies are very rare,
-and can be  adjusted with little concern for loss of accuracy.
+Those anomalous entries come almost entirely from one day.  Our guess is that
+the detection limit for the method used does not vary, and so, these
+observations were incorrectly recorded. Luckily, the apparent inconsistencies
+are very rare, and can be adjusted with little concern for loss of accuracy.
+
 ```{r}
 the_data$ColiVal[the_data$ColiVal==1.9 ] = 2.0
 ```
@@ -262,6 +267,7 @@ the_data %>%
 the_data[the_data$ColiVal==18 & the_data$LCFlag, ] %>%
   select(SDate, ColiScore, RawColi, ColiVal, LCFlag)
 ```
+
 DMR recorded three samples as left censored, with a reporting limit of 18. The
 observations were all from a single day.  This elevated detection
 limit is problematic, as it cold bias any unsophisticated handling of

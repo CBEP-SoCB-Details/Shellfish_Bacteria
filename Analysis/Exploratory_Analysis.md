@@ -14,10 +14,11 @@ library(readr)
 library(tidyverse)
 #> Warning: package 'tidyverse' was built under R version 4.0.5
 #> -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
-#> v ggplot2 3.3.3     v dplyr   1.0.6
-#> v tibble  3.1.2     v stringr 1.4.0
-#> v tidyr   1.1.3     v forcats 0.5.1
+#> v ggplot2 3.3.5     v dplyr   1.0.7
+#> v tibble  3.1.6     v stringr 1.4.0
+#> v tidyr   1.1.4     v forcats 0.5.1
 #> v purrr   0.3.4
+#> Warning: package 'ggplot2' was built under R version 4.0.5
 #> Warning: package 'tidyr' was built under R version 4.0.5
 #> Warning: package 'dplyr' was built under R version 4.0.5
 #> Warning: package 'forcats' was built under R version 4.0.5
@@ -54,28 +55,18 @@ path <- file.path(sibling, fn)
 
 ``` r
 coli_data <- read_csv(path)
-#> 
+#> Rows: 10130 Columns: 19
 #> -- Column specification --------------------------------------------------------
-#> cols(
-#>   SDate = col_date(format = ""),
-#>   STime = col_time(format = ""),
-#>   SDateTime = col_datetime(format = ""),
-#>   Station = col_character(),
-#>   GROW_AREA = col_character(),
-#>   OpenClosed = col_character(),
-#>   WDIR = col_character(),
-#>   Tide = col_character(),
-#>   Class = col_character(),
-#>   CATEGORY = col_character(),
-#>   Temp = col_double(),
-#>   Sal = col_double(),
-#>   ColiScore = col_double(),
-#>   RawColi = col_character(),
-#>   YEAR = col_double(),
-#>   LCFlag = col_logical(),
-#>   RCFlag = col_logical(),
-#>   ColiVal = col_double()
-#> )
+#> Delimiter: ","
+#> chr  (8): Station, GROW_AREA, OpenClosed, WDIR, Tide, Class, CATEGORY, RawColi
+#> dbl  (6): ...1, Temp, Sal, ColiScore, YEAR, ColiVal
+#> lgl  (2): LCFlag, RCFlag
+#> dttm (1): SDateTime
+#> date (1): SDate
+#> time (1): STime
+#> 
+#> i Use `spec()` to retrieve the full column specification for this data.
+#> i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
 
 ## Data Preparation
@@ -117,8 +108,7 @@ data.
 
 (Note that `ColiVal` has addressed inconsistent handling of non-detects,
 by rebuilding numeric data from the source. `ColiVal` includes censored
-values. Censoring is shown with `LCFlag` and `RCFlag`). We need to
-replace
+values. Censoring is shown with `LCFlag` and `RCFlag`).
 
 ``` r
 test <- coli_data %>%
@@ -136,7 +126,7 @@ ggplot(test, aes(row, ColiVal)) +
 #> Warning: Removed 1 rows containing missing values (geom_point).
 ```
 
-<img src="exploratory_analysis_files/figure-gfm/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+<img src="Exploratory_Analysis_files/figure-gfm/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
 
 ### Low Values
 
@@ -168,7 +158,8 @@ ggplot(coli_data, aes(SDateTime, ColiVal)) +
 #> Warning: Removed 684 rows containing missing values (geom_point).
 ```
 
-<img src="exploratory_analysis_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+<img src="Exploratory_Analysis_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
+
 This shows us: 1. The discrete of values observed 2. The importance of
 censoring 3. Possible coding errors where censored values were perhaps
 not consistently coded in the original data. 4. Data is highly skewed,
@@ -186,7 +177,7 @@ by looking for a less than sign (“&lt;”) in the original data. We could
 have alternatively looked at whether the raw col and coliscore values
 were identical.
 
-So lets go to the the trouble of reshaping our data the way we really
+So let’s go to the the trouble of reshaping our data the way we really
 want.
 
 ``` r
@@ -198,9 +189,10 @@ coli_data %>%
   ggplot(aes(YEAR, gmColi, color=GROW_AREA)) + geom_line(lwd=2)
 ```
 
-<img src="exploratory_analysis_files/figure-gfm/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+<img src="Exploratory_Analysis_files/figure-gfm/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+
 So, geometric means vary year to year and Growing Area to Growing Area.
-WE obviously need indications of variability to raw any conclusions, but
+We obviously need indications of variability to raw any conclusions, but
 this points in useful directions.
 
 ## Histograms
@@ -213,7 +205,8 @@ ggplot(coli_data, aes(log10(ColiVal))) +
 #> Warning: Removed 684 rows containing non-finite values (stat_bin).
 ```
 
-<img src="exploratory_analysis_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+<img src="Exploratory_Analysis_files/figure-gfm/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+
 And then a log-log histogram. A Pareto random variable produces a linear
 relation on in a log-log histogram.
 
@@ -226,7 +219,8 @@ ggplot(coli_data, aes(ColiVal)) +
 #> Warning: Removed 115 rows containing missing values (geom_bar).
 ```
 
-<img src="exploratory_analysis_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
+<img src="Exploratory_Analysis_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
+
 As suggested before, this is a strongly skewed, heavy-tailed
 distribution. So, Gamma, Exponential, and perhaps Pareto distributions
 might work, but that nearly linear decline int eh histogram suggests a
@@ -291,7 +285,7 @@ coli_data %>%
 #> Warning: Removed 684 rows containing missing values (geom_point).
 ```
 
-<img src="exploratory_analysis_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
+<img src="Exploratory_Analysis_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
 
 So, data are very highly scattered, obscuring patterns even when the
 fecal coliform counts are log transformed. It appears fecal coliform
@@ -321,7 +315,7 @@ coli_data %>%
 #> Warning: Removed 684 rows containing non-finite values (stat_density).
 ```
 
-<img src="exploratory_analysis_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
+<img src="Exploratory_Analysis_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
 
 No strong patterns with time of year, month, or year, except weak
 relationships to time of year. Obvious artifacts due to the discrete
@@ -339,8 +333,8 @@ The data is distributed approximately Pareto, so perhaps it could be
 modeled with a Pareto GLM (over a fixed support of perhaps 0:inf, or
 1:inf). The package VGAM supports such Pareto GLMs.
 
-It may be more appropriate to transform observations into exceedences of
-one or more thresholds, and analyze the probability of exceedences with
+It may be more appropriate to transform observations into exceedances of
+one or more thresholds, and analyze the probability of exceedances with
 a binomial or quasi-binomial GLM.
 
 A final alternative may be to use a one-dimensional PERMANOVA to analyze
@@ -411,7 +405,7 @@ interval.
 A “90 day interval” might apply to a summer’s worth of data, but in most
 years that will only represent a handful of observations at each site.
 Also note that this standard is written in terms of “enterococci”, not
-“fecal coliform or”coliformes".
+“fecal coliform” or “coliformes”.
 
 ## Evaluation
 

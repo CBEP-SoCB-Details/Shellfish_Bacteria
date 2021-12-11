@@ -108,14 +108,15 @@ library(MASS)   # Load before tidyverse because it has a select() function
 library(mgcv)   # For GAMs and GAMMs; used her for seasonal smoothers
 #> Warning: package 'mgcv' was built under R version 4.0.5
 #> Loading required package: nlme
-#> This is mgcv 1.8-35. For overview type 'help("mgcv-package")'.
+#> This is mgcv 1.8-38. For overview type 'help("mgcv-package")'.
 library(tidyverse)
 #> Warning: package 'tidyverse' was built under R version 4.0.5
 #> -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
-#> v ggplot2 3.3.3     v purrr   0.3.4
-#> v tibble  3.1.2     v dplyr   1.0.6
-#> v tidyr   1.1.3     v stringr 1.4.0
-#> v readr   1.4.0     v forcats 0.5.1
+#> v ggplot2 3.3.5     v purrr   0.3.4
+#> v tibble  3.1.6     v dplyr   1.0.7
+#> v tidyr   1.1.4     v stringr 1.4.0
+#> v readr   2.1.0     v forcats 0.5.1
+#> Warning: package 'ggplot2' was built under R version 4.0.5
 #> Warning: package 'tidyr' was built under R version 4.0.5
 #> Warning: package 'dplyr' was built under R version 4.0.5
 #> Warning: package 'forcats' was built under R version 4.0.5
@@ -133,6 +134,7 @@ library(GGally)
 #>   +.gg   ggplot2
 
 library(emmeans)   # For marginal means
+#> Warning: package 'emmeans' was built under R version 4.0.5
 #> 
 #> Attaching package: 'emmeans'
 #> The following object is masked from 'package:GGally':
@@ -252,8 +254,8 @@ coli_data <- coli_data %>%
 
 We have some data that was selected for stations outside of Casco Bay.
 To be  
-careful, we remove sampling data for any site in th two adjacent Growing
-Areas, “WH” and “WM”.
+careful, we remove sampling data for any site in the two adjacent
+Growing Areas, “WH” and “WM”.
 
 ``` r
 coli_data <- coli_data %>%
@@ -364,27 +366,14 @@ fpath <- file.path(sibling, fn)
 
 imperv_data <- read_csv(fpath) %>%
   select(Station, pct_1000, pct_500, pct_100, pct_l_1000, pct_l_500, pct_l_100)
-#> 
+#> Rows: 259 Columns: 17
 #> -- Column specification --------------------------------------------------------
-#> cols(
-#>   OBJECTID = col_double(),
-#>   Station = col_character(),
-#>   Lat = col_double(),
-#>   Long = col_double(),
-#>   Grow_Area = col_character(),
-#>   land_1000 = col_double(),
-#>   land_500 = col_double(),
-#>   land_100 = col_double(),
-#>   imperv_1000 = col_double(),
-#>   imperv_500 = col_double(),
-#>   imperv_100 = col_double(),
-#>   pct_100 = col_double(),
-#>   pct_500 = col_double(),
-#>   pct_1000 = col_double(),
-#>   pct_l_100 = col_double(),
-#>   pct_l_500 = col_double(),
-#>   pct_l_1000 = col_double()
-#> )
+#> Delimiter: ","
+#> chr  (2): Station, Grow_Area
+#> dbl (15): OBJECTID, Lat, Long, land_1000, land_500, land_100, imperv_1000, i...
+#> 
+#> i Use `spec()` to retrieve the full column specification for this data.
+#> i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
 
 ``` r
@@ -417,8 +406,8 @@ freq_data %>% select(month, all_lvls) %>%
 
 <img src="frequency-analysis_files/figure-gfm/simple_pairsplot-1.png" style="display: block; margin: auto;" />
 
-1.  Most observations are from summer months
-2.  Most observations are lower than all our cut points
+1.  Most observations are from summer months  
+2.  Most observations are lower than all our cut points  
 3.  Probability of exceedences appears slightly higher in summer months.
 
 ``` r
@@ -498,7 +487,7 @@ system.time(p90_open_glm_1 <- glm(p90_open  ~ station,
              data = freq_data,
              family=binomial(link=logit)))
 #>    user  system elapsed 
-#>    8.28    0.07    8.41
+#>    8.70    0.09    8.80
 ```
 
 ``` r
@@ -544,6 +533,7 @@ plot(p_res) +
 ```
 
 <img src="frequency-analysis_files/figure-gfm/station_glm_graphic-1.png" style="display: block; margin: auto;" />
+
 Many sites show unstable standard errors, as they were never observed
 with a sample that failed the standard, triggering a Hauke-Donner
 effect. That makes estimation of parameters and standard errors
@@ -563,6 +553,7 @@ ggplot(tmp, aes(p_p90_open, prob)) +
 ```
 
 <img src="frequency-analysis_files/figure-gfm/observed_vs_predicted-1.png" style="display: block; margin: auto;" />
+
 In a simple model, the predictions match the observed relative
 frequencies and the standard errors behave as expected (wider near the
 middle of a binomial distribution, narrower and asymmetrical near the
@@ -583,7 +574,7 @@ system.time(
              family=binomial(link=logit))
   )
 #>    user  system elapsed 
-#>   51.33    0.90   52.26
+#>   51.22    0.62   51.85
 ```
 
 ``` r
@@ -637,7 +628,6 @@ plt <- ggplot(p_res, aes(grow_area, prob)) +
   xlab('Maine DMR Growing Area') +
 
   theme_cbep(base_size = 12)
-
 plt
 ```
 
@@ -650,7 +640,7 @@ system.time(p90_open_gam_months <- gam(p90_open ~ month + s(station, bs = 're'),
              data = freq_data,
              family=binomial(link=logit)))
 #>    user  system elapsed 
-#>   58.55    0.81   59.41
+#>   57.74    0.51   58.25
 ```
 
 ``` r
@@ -695,11 +685,8 @@ plt <- ggplot(mms, aes(month, prob)) +
   xlab('') + 
   ylab(expression(atop('Probability of Meeting', 
                            'P90 ' ~ 'Fecal Coliforms' ~ ' Standard'))) +
-  
   ylim(0.75, 1.0) +
-
   theme_cbep(base_size = 12)
-
 plt
 ```
 
@@ -718,7 +705,7 @@ system.time(
                            data = freq_data,
                            family=binomial(link=logit)))
 #>    user  system elapsed 
-#>   90.56    1.06   91.64
+#>   90.27    1.01   91.32
 ```
 
 ``` r
@@ -738,10 +725,10 @@ gam.check(p90_open_gam_rain)
     #> Basis dimension (k) checking results. Low p-value (k-index<1) may
     #> indicate that k is too low, especially if edf is close to k'.
     #> 
-    #>                      k'    edf k-index p-value    
-    #> s(log1precip)      4.00   3.97    0.92    0.04 *  
-    #> s(log1precip_d1)   4.00   3.98    0.91  <2e-16 ***
-    #> s(station)       238.00 153.80      NA      NA    
+    #>                      k'    edf k-index p-value  
+    #> s(log1precip)      4.00   3.97    0.92    0.12  
+    #> s(log1precip_d1)   4.00   3.98    0.91    0.04 *
+    #> s(station)       238.00 153.80      NA      NA  
     #> ---
     #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -854,17 +841,17 @@ system.time(imp_100 <- gam(p90_open ~ pct_l_100 + s(station, bs = 're'),
              data = freq_data,
              family=binomial(link=logit)))
 #>    user  system elapsed 
-#>   42.41    0.38   42.78
+#>   41.92    0.50   42.42
 system.time(imp_500 <- gam(p90_open ~ pct_l_500 + s(station, bs = 're'),
              data = freq_data,
              family=binomial(link=logit)))
 #>    user  system elapsed 
-#>   45.17    0.58   45.77
+#>   44.48    0.66   45.17
 system.time(imp_1000 <- gam(p90_open ~ pct_l_1000 + s(station, bs = 're'),
              data = freq_data,
              family=binomial(link=logit)))
 #>    user  system elapsed 
-#>   49.46    0.50   49.99
+#>   48.17    0.63   48.81
 ```
 
 ``` r
@@ -918,7 +905,7 @@ anova(imp_1000)
 ```
 
 The only version that shows a statistically robust response is the 1000
-meter model. The other s are not significant.
+meter model. The others are not significant.
 
 Now we run similar models on the square root of percent cover.
 
@@ -927,17 +914,17 @@ system.time(imp_100_t <- gam(p90_open ~ sqrt(pct_l_100) + s(station, bs = 're'),
              data = freq_data,
              family=binomial(link=logit)))
 #>    user  system elapsed 
-#>   37.17    0.54   37.71
+#>   35.81    0.53   36.34
 system.time(imp_500_t <- gam(p90_open ~ sqrt(pct_l_500) + s(station, bs = 're'),
              data = freq_data,
              family=binomial(link=logit)))
 #>    user  system elapsed 
-#>   45.73    0.50   46.27
+#>   43.91    0.53   44.45
 system.time(imp_1000_t <- gam(p90_open ~ sqrt(pct_l_1000) + s(station, bs = 're'),
              data = freq_data,
              family=binomial(link=logit)))
 #>    user  system elapsed 
-#>   54.55    0.64   55.26
+#>   53.55    0.57   54.13
 ```
 
 ``` r
@@ -1059,6 +1046,7 @@ rawprobs %>%
 ```
 
 <img src="frequency-analysis_files/figure-gfm/imperv_graphic-1.png" style="display: block; margin: auto;" />
+
 So, the relationship is statistically significant, but not especially
 striking or robust. There is a lot of scatter, and the trend is driven
 mostly by (a) the frequency of sites that never see bad water quality,
@@ -1143,7 +1131,7 @@ system.time(
                                          reverse = FALSE))
 )
 #>    user  system elapsed 
-#>    0.21    0.01    0.22
+#>    0.20    0.01    0.22
 ```
 
 ``` r
@@ -1215,7 +1203,7 @@ system.time(
                                          reverse = FALSE))
 )
 #>    user  system elapsed 
-#>    0.23    0.01    0.25
+#>    0.23    0.00    0.23
 ```
 
 ##### Compare Models
@@ -1237,7 +1225,7 @@ the logic of the models, to clarify the structure of the model
 predictions.
 
 First, we calculate the log odds ratios. This is the linear predictor
-generated by hte model. These are log odds of being below each
+generated by the model. These are log odds of being below each
 “cutpoint.”
 
 ``` r
@@ -1251,7 +1239,7 @@ pp
 #> 4           2.329362           2.944315           3.822636           4.529399
 ```
 
-Then we convert from log odds to probabilities ob being below each
+Then we convert from log odds to probabilities of being below each
 threshold.
 
 ``` r
@@ -1308,14 +1296,15 @@ pp
 We can fit the same model using the `polr()` function from `MASS`. The
 primary difference are:  
 1. `polr()` can not fit the non-proportional odds model we fit as an
-alternate in `vglm()`. 2. `polr()` parameterizes the model in a
-different way, so the model parameters are the negative of what was
-generated in `vglm()`. 3. `MASS` provides the option of producing
-predicted probabilities with the `type = 'p'` parameter to the
+alternate in `vglm()`.  
+2. `polr()` parameterizes the model in a different way, so the model
+parameters are the negative of what was generated in `vglm()`.  
+3. `MASS` provides the option of producing predicted probabilities with
+the `type = 'p'` parameter to the
 ‘predict.polr()`function, rather than the`type =
-’response’`parameter used by`VGAM`. 4.`vglm()\` has many more models and
-alternate forms for presenting the data, making it both more flexible,
-and easier to misapply.
+’response’`parameter used by`VGAM`.   4.`vglm()\` has many more models
+and alternate forms for presenting the data, making it both more
+flexible, and easier to misapply.
 
 ``` r
 system.time(
@@ -1324,7 +1313,7 @@ system.time(
                     method = "logistic")
 )
 #>    user  system elapsed 
-#>    0.24    0.00    0.23
+#>    0.22    0.00    0.22
 ```
 
 ``` r
@@ -1367,7 +1356,8 @@ pp
 
 ### Rainfall Models
 
-We continue examing models of the impact of \#\#\#\# Full model
+We continue by examining models of the impact of precipitation \#\#\#\#
+Full model
 
 ``` r
 system.time(
@@ -1378,7 +1368,7 @@ system.time(
                                          reverse = FALSE))
 )
 #>    user  system elapsed 
-#>    0.21    0.04    0.23
+#>    0.22    0.00    0.22
 ```
 
 ``` r
@@ -1428,7 +1418,7 @@ system.time(
                                          reverse = FALSE))
 )
 #>    user  system elapsed 
-#>    0.20    0.01    0.22
+#>     0.2     0.0     0.2
 ```
 
 ``` r

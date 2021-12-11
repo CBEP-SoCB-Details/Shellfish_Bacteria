@@ -3,35 +3,35 @@ Shellfish Sanitation Program Data Review and Assembly
 Curtis C. Bohlen, Casco Bay Estuary Partnership.
 11/14/2020
 
-  - [Install Libraries](#install-libraries)
-  - [Load p90 Data](#load-p90-data)
-      - [Folder References](#folder-references)
-      - [Read Data](#read-data)
-      - [Finalize Combined p90 Data](#finalize-combined-p90-data)
-  - [Extract list of Locations /
-    Stations](#extract-list-of-locations-stations)
-      - [Export Locations Data As CSV
+-   [Install Libraries](#install-libraries)
+-   [Load p90 Data](#load-p90-data)
+    -   [Folder References](#folder-references)
+    -   [Read Data](#read-data)
+    -   [Finalize Combined p90 Data](#finalize-combined-p90-data)
+-   [Extract list of Locations /
+    Stations](#extract-list-of-locations--stations)
+    -   [Export Locations Data As CSV
         Files](#export-locations-data-as-csv-files)
-  - [P90 Data Review](#p90-data-review)
-      - [Check Consistency of names and
+-   [P90 Data Review](#p90-data-review)
+    -   [Check Consistency of names and
         order](#check-consistency-of-names-and-order)
-      - [The summary data is not what it
+    -   [The summary data is not what it
         appears](#the-summary-data-is-not-what-it-appears)
-      - [Check Data Structure](#check-data-structure)
-      - [Data Consistency](#data-consistency)
-  - [Raw Observations 2015 through
+    -   [Check Data Structure](#check-data-structure)
+    -   [Data Consistency](#data-consistency)
+-   [Raw Observations 2015 through
     2018](#raw-observations-2015-through-2018)
-      - [Load Data](#load-data)
-      - [Review Status of Data](#review-status-of-data)
-      - [Convert NNE wind direction to
+    -   [Load Data](#load-data)
+    -   [Review Status of Data](#review-status-of-data)
+    -   [Convert NNE wind direction to
         N](#convert-nne-wind-direction-to-n)
-      - [Convert Order of Factors](#convert-order-of-factors)
-      - [Simplify Column Names](#simplify-column-names)
-  - [Deal With Censoring](#deal-with-censoring)
-      - [Correct Censoring
+    -   [Convert Order of Factors](#convert-order-of-factors)
+    -   [Simplify Column Names](#simplify-column-names)
+-   [Deal With Censoring](#deal-with-censoring)
+    -   [Correct Censoring
         Inconsistencies](#correct-censoring-inconsistencies)
-  - [Data export](#data-export)
-  - [Final Data Cleanup](#final-data-cleanup)
+-   [Data export](#data-export)
+-   [Final Data Cleanup](#final-data-cleanup)
 
 <img
     src="https://www.cascobayestuary.org/wp-content/uploads/2014/04/logo_sm.jpg"
@@ -45,14 +45,24 @@ library(readxl)
 library(tidyverse)
 ```
 
-    ## -- Attaching packages ----------------------------------------------------------------------------------- tidyverse 1.3.0 --
+    ## Warning: package 'tidyverse' was built under R version 4.0.5
 
-    ## v ggplot2 3.3.2     v dplyr   1.0.2
-    ## v tibble  3.0.3     v stringr 1.4.0
-    ## v tidyr   1.1.2     v forcats 0.5.0
+    ## -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
+
+    ## v ggplot2 3.3.5     v dplyr   1.0.7
+    ## v tibble  3.1.6     v stringr 1.4.0
+    ## v tidyr   1.1.4     v forcats 0.5.1
     ## v purrr   0.3.4
 
-    ## -- Conflicts -------------------------------------------------------------------------------------- tidyverse_conflicts() --
+    ## Warning: package 'ggplot2' was built under R version 4.0.5
+
+    ## Warning: package 'tidyr' was built under R version 4.0.5
+
+    ## Warning: package 'dplyr' was built under R version 4.0.5
+
+    ## Warning: package 'forcats' was built under R version 4.0.5
+
+    ## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
 
@@ -68,6 +78,8 @@ compatible, so we need to handle this carefully.
 sibfldnm <- 'Original_Data'
 parent <- dirname(getwd())
 sibling <- file.path(parent,sibfldnm)
+niecefn <- 'Public p90 Data'
+niece <- file.path(sibling, niecefn)
 
 fl1<- "2016 p90 for CBEP.xlsx"
 fl2 <- "2017 p90 for CBEP.xlsx"
@@ -90,7 +102,7 @@ p90_data_2017 <- read_excel(path) %>%
   select(-Min_Date) %>%
   mutate(Year = 2017)
 
-path <- file.path(sibling, fl3)
+path <- file.path(niece, fl3)
 p90_data_2018 <- read_csv(path) %>%
   select(-OBJECTID) %>%
   select(-X,-Y) %>%
@@ -99,26 +111,16 @@ p90_data_2018 <- read_csv(path) %>%
   mutate(Year = 2018)
 ```
 
-    ## Parsed with column specification:
-    ## cols(
-    ##   X = col_double(),
-    ##   Y = col_double(),
-    ##   OBJECTID = col_double(),
-    ##   Station = col_character(),
-    ##   Class = col_character(),
-    ##   Count_ = col_double(),
-    ##   MFCount = col_double(),
-    ##   GM = col_double(),
-    ##   SDV = col_double(),
-    ##   MAX_ = col_double(),
-    ##   P90 = col_double(),
-    ##   Appd_Std = col_double(),
-    ##   Restr_Std = col_double(),
-    ##   Lat_DD = col_double(),
-    ##   Long_DD = col_double(),
-    ##   Grow_Area = col_character(),
-    ##   GlobalID = col_character()
-    ## )
+    ## Rows: 1260 Columns: 17
+
+    ## -- Column specification --------------------------------------------------------
+    ## Delimiter: ","
+    ## chr  (4): Station, Class, Grow_Area, GlobalID
+    ## dbl (13): X, Y, OBJECTID, Count_, MFCount, GM, SDV, MAX_, P90, Appd_Std, Res...
+
+    ## 
+    ## i Use `spec()` to retrieve the full column specification for this data.
+    ## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 ## Finalize Combined p90 Data
 
@@ -411,7 +413,10 @@ raw_data <- read_csv(path,
   mutate(YEAR = as.numeric(format(EFFORT_START_DATE, "%Y")))
 ```
 
-    ## Warning: Missing column names filled in: 'X1' [1]
+    ## New names:
+    ## * `` -> ...1
+
+    ## Warning: The following named parsers don't match the column names: X1
 
 ## Review Status of Data
 
@@ -519,18 +524,18 @@ with(raw_data, xtabs(~OPEN_CLOSED_FLAG+CURRENT_CLASSIFICATION_CODE))
     ##                O 3695 2314  105    0  792    1
     ##                X    0    0    0    0    0   38
 
-Note that there’s a one to one match between category -= Z and Current
-Classification = X. Is this a change in data categories? Also note that
-Category = I was only used once.
+Note that there’s a one to one match between category == Z and Current
+Classification == X. Is this a change in data categories? Also note that
+Category == I was only used once.
 
 Current classification looks like it may be useful, but I’m not sure
-what to do with Current Classification =, which is almost al 2019 data,
-perhas because status has not been finalized yet?
+what to do with Current Classification =, which is almost all 2019 data,
+perhaps because status has not been finalized yet?
 
 ## Convert NNE wind direction to N
 
 NNE was used for only 10 observations in 2016, and its use is
-inconsistent with recording wind direction in eight directions. THE
+inconsistent with recording wind direction in eight directions. The
 direction could be swapped to “NE” or to “N.” We arbitrarily selected N.
 
 ``` r
@@ -585,15 +590,15 @@ the p90 files.
 names(raw_data)
 ```
 
-    ##  [1] "EFFORT_START_DATE"           "EFFORT_START_TIME"          
-    ##  [3] "START_DATE_TIME"             "LOCATION_ID"                
-    ##  [5] "GROWING_AREA"                "OPEN_CLOSED_FLAG"           
-    ##  [7] "WIND_DIRECTION"              "TIDE_STAGE"                 
-    ##  [9] "CURRENT_CLASSIFICATION_CODE" "CATEGORY"                   
-    ## [11] "TEMP_C"                      "FLOOD"                      
-    ## [13] "SALINITY_PCT"                "COL_SCORE"                  
-    ## [15] "RAW_COL_SCORE"               "DELIVERY_TEMP_C"            
-    ## [17] "YEAR"
+    ##  [1] "...1"                        "EFFORT_START_DATE"          
+    ##  [3] "EFFORT_START_TIME"           "START_DATE_TIME"            
+    ##  [5] "LOCATION_ID"                 "GROWING_AREA"               
+    ##  [7] "OPEN_CLOSED_FLAG"            "WIND_DIRECTION"             
+    ##  [9] "TIDE_STAGE"                  "CURRENT_CLASSIFICATION_CODE"
+    ## [11] "CATEGORY"                    "TEMP_C"                     
+    ## [13] "FLOOD"                       "SALINITY_PCT"               
+    ## [15] "COL_SCORE"                   "RAW_COL_SCORE"              
+    ## [17] "DELIVERY_TEMP_C"             "YEAR"
 
 ``` r
 raw_data <- raw_data %>%
@@ -620,10 +625,10 @@ relatively uncommon. We are unaware of a library in R that handles
 doubly censored data with grace, however it would not be too difficult
 to develop our own maximum likelihood methods.
 
-Here we handle the confusing `RawColi` data (which includes “\<” and
-“\>” values, so can not be parsed as numeric by R), add separate
-flags for left and right censored observations, and create a data column
-that contains either observed values, or the censored value (reporting
+Here we handle the confusing `RawColi` data (which includes “&lt;” and
+“&gt;” values, so can not be parsed as numeric by R), add separate flags
+for left and right censored observations, and create a data column that
+contains either observed values, or the censored value (reporting
 limit), depending on values of those flags.
 
 There is some evidence that DMR may have coded the censored values

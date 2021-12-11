@@ -29,6 +29,8 @@ handle this carefully.
 sibfldnm <- 'Original_Data'
 parent <- dirname(getwd())
 sibling <- file.path(parent,sibfldnm)
+niecefn <- 'Public p90 Data'
+niece <- file.path(sibling, niecefn)
 
 fl1<- "2016 p90 for CBEP.xlsx"
 fl2 <- "2017 p90 for CBEP.xlsx"
@@ -50,7 +52,7 @@ p90_data_2017 <- read_excel(path) %>%
   select(-Min_Date) %>%
   mutate(Year = 2017)
 
-path <- file.path(sibling, fl3)
+path <- file.path(niece, fl3)
 p90_data_2018 <- read_csv(path) %>%
   select(-OBJECTID) %>%
   select(-X,-Y) %>%
@@ -282,18 +284,19 @@ with(raw_data, levels(CATEGORY))
 with(raw_data, xtabs(~CATEGORY+CURRENT_CLASSIFICATION_CODE))
 with(raw_data, xtabs(~OPEN_CLOSED_FLAG+CURRENT_CLASSIFICATION_CODE))
 ```
-Note that there's a one to one match between category -= Z and Current
-Classification = X.  Is this a change in data categories?  Also note that 
-Category = I was only used once.
+Note that there's a one to one match between category == Z and Current
+Classification == X.  Is this a change in data categories?  Also note that 
+Category == I was only used once.
 
 Current classification looks like it may be useful, but I'm not sure what to do 
-with Current Classification =, which is almost al 2019 data, perhas because 
+with Current Classification =, which is almost all 2019 data, perhaps because 
 status has not been finalized yet?
 
 ## Convert NNE wind direction to N
 NNE was used for only 10 observations in 2016, and its use is inconsistent with 
-recording wind direction  in eight directions.  THE direction could be swapped
+recording wind direction  in eight directions.  The direction could be swapped
 to "NE" or to "N."  We arbitrarily selected N.
+
 ```{r}
 raw_data <- raw_data %>%
   mutate(WIND_DIRECTION = factor(if_else(WIND_DIRECTION == 'NNE', 'N',
@@ -307,6 +310,7 @@ bit easier to look at results.  It also has the effect of changing the base
 category for contrasts.  Note that this will not affect ordering of factors when
 data is loaded in from CSV files, so this code (or something very like it) will
 have to be run in the data analysis scripts too.
+
 ```{r}
 raw_data <- raw_data %>%
   mutate(WIND_DIRECTION =factor(WIND_DIRECTION,
@@ -324,6 +328,7 @@ raw_data <- raw_data %>%
 Data names from DMR are long, in all caps, and awkward, so we want to simplify.  
 While we are at it, we want names to more or less match what we found in the 
 p90 files.
+
 ```{r}
 names(raw_data)
 ```
@@ -399,6 +404,7 @@ write_csv(the_data, 'Shellfish data 2015 2018.csv', na='')
 We may want to directly load the data produces in this Notebook for use in
 analysis, rather than importing it from the CSV file, so we might as well clean
 things up.
+
 ```{r}
 rm(cn, fn, fl1, fl2, fl3, fl4, path, parent, sibfldnm, sibling)
 rm(raw_data)

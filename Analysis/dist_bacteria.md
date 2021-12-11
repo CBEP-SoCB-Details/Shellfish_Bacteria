@@ -50,6 +50,7 @@ be confirmed in the model context.
 ``` r
 library(readr)
 library(fitdistrplus)  # For cullen-fray graph etc.
+#> Warning: package 'fitdistrplus' was built under R version 4.0.5
 #> Loading required package: MASS
 #> Loading required package: survival
 library(actuar)        # For a particular version of Pareto Distribution fxns
@@ -62,10 +63,11 @@ library(actuar)        # For a particular version of Pareto Distribution fxns
 library(tidyverse)  # Loads another `select()`
 #> Warning: package 'tidyverse' was built under R version 4.0.5
 #> -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
-#> v ggplot2 3.3.3     v dplyr   1.0.6
-#> v tibble  3.1.2     v stringr 1.4.0
-#> v tidyr   1.1.3     v forcats 0.5.1
+#> v ggplot2 3.3.5     v dplyr   1.0.7
+#> v tibble  3.1.6     v stringr 1.4.0
+#> v tidyr   1.1.4     v forcats 0.5.1
 #> v purrr   0.3.4
+#> Warning: package 'ggplot2' was built under R version 4.0.5
 #> Warning: package 'tidyr' was built under R version 4.0.5
 #> Warning: package 'dplyr' was built under R version 4.0.5
 #> Warning: package 'forcats' was built under R version 4.0.5
@@ -75,6 +77,7 @@ library(tidyverse)  # Loads another `select()`
 #> x dplyr::select() masks MASS::select()
 
 library(emmeans)   # For marginal means
+#> Warning: package 'emmeans' was built under R version 4.0.5
 #> 
 #> Attaching package: 'emmeans'
 #> The following object is masked from 'package:actuar':
@@ -158,7 +161,8 @@ ggplot(coli_data, aes(x = ColiVal, y = ColiVal_2, color = LCFlag)) +
 ```
 
 <img src="dist_bacteria_files/figure-gfm/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
-Almost all censored values were at 2
+
+Almost all censored values were at 2.
 
 ``` r
 coli_data %>%
@@ -166,7 +170,7 @@ coli_data %>%
   pull(ColiVal_2) %>%
   summary
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>  0.5530  0.5999  0.6112  0.6115  0.6229  0.6798
+#>  0.5491  0.6000  0.6116  0.6115  0.6229  0.6736
 ```
 
 So, our (lognormal) based estimator for censored values estimates a
@@ -187,8 +191,9 @@ these data.
 
 Given the non-detects and censored upper values, we can consider 1.
 Fitting data to a parametric family of distributions, accounting for
-censoring 2. Robust or resistant statistical methods 3. Non-parametric
-methods
+censoring  
+2. Robust or resistant statistical methods  
+3. Non-parametric methods
 
 ## Analytic Graphics
 
@@ -244,7 +249,7 @@ descdist(log(test_dat$ColiVal), boot = 1000)
     #> estimated skewness:  2.346337 
     #> estimated kurtosis:  8.856334
 
-even log-transformed data is problematic to model. It is significantly
+Even log-transformed data is problematic to model. It is significantly
 more skew than an exponential or gamma distribution.
 
 ## Gamma Distribution
@@ -265,7 +270,7 @@ The empirical moments are:
 (a <- with(coli_data, list(mean=mean(ColiVal_2, na.rm=TRUE),
                            var=var(ColiVal_2, na.rm=TRUE))))
 #> $mean
-#> [1] 16.2442
+#> [1] 16.24422
 #> 
 #> $var
 #> [1] 9839.914
@@ -276,9 +281,9 @@ the following parameters:
 
 ``` r
 (theta = a$var/a$mean)
-#> [1] 605.7494
+#> [1] 605.7487
 (alpha = a$mean/theta)
-#> [1] 0.0268167
+#> [1] 0.02681676
 ```
 
 ## Pareto Distribution
@@ -301,7 +306,7 @@ log-log plot. Other versions are close to linear. This property (shared
 with the Gamma distribution) suggests the Pareto may be a good bet for
 the bacteria data, which looks similar (if you ignore censoring).
 
-The Pareto distribution can be fit a several ways. First and second
+The Pareto distribution can be fit several ways. First and second
 moments have relatively simple closed form values, so parameters could
 be estimated using either the method of moments, or maximum likelihood
 methods.
@@ -411,6 +416,7 @@ ggplot() +
 ```
 
 <img src="dist_bacteria_files/figure-gfm/pareto_scale_demo-1.png" style="display: block; margin: auto;" />
+
 So, as SCALE goes up, low values drop, mid and higher values rise.
 
 ``` r
@@ -435,6 +441,7 @@ ggplot() +
 ```
 
 <img src="dist_bacteria_files/figure-gfm/pareto_shape_demo-1.png" style="display: block; margin: auto;" />
+
 The SHAPE parameter has to do with how closely the distribution hugs
 towards the “origin” – more correctly the location parameter, which is
 the minimum.
@@ -474,7 +481,7 @@ pareto.MLE <- function(X)
 }
 
 (moment_parms <- pareto.MLE(coli_data$ColiVal_2))
-#> [1] 0.5529578 0.8173746
+#> [1] 0.5490743 0.8126995
 ```
 
 #### Fitting the Pareto with `VGAM`
@@ -492,7 +499,7 @@ vgam_parms <- exp(coef(paretofit))
 names(vgam_parms) <- c('Scale', 'Shape')
 vgam_parms
 #>     Scale     Shape 
-#> 0.1423264 0.4867115
+#> 0.1422401 0.4866275
 ```
 
 Given scaling issues, it is difficult to compare these three model fits
@@ -525,7 +532,7 @@ f_mle <- fitdist(coli_data$ColiVal_2, "paretoII",
 cat('\n')
 (fd_parms <- f_mle$estimate[c(2,1)])
 #>     scale     shape 
-#> 0.1422595 0.4866481
+#> 0.1422302 0.4865680
 ```
 
 ##### Quantile Matching
@@ -721,7 +728,7 @@ est_pareto_variance <- function(scale, shape, location){
 ``` r
 fd_parms
 #>     scale     shape 
-#> 0.1422595 0.4866481
+#> 0.1422302 0.4865680
 est_pareto_mean(fd_parms[[1]], fd_parms[[2]], 0.5)
 #> [1] NaN
 est_pareto_variance(fd_parms[[1]], fd_parms[[2]], 0.5)

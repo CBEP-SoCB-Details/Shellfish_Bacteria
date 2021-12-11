@@ -3,7 +3,7 @@ Curtis C. Bohlen received an e-mail From Benjamin Wahle of DMR on November 27,
 2019, containing the following file: "Casco Bay WQ 15 19.csv"  This file
 contains the primary data on which our analyses are based.
 
-Curtis C. Bohlen received another e-mail December , 2019,  from Wahle, 
+Curtis C. Bohlen received another e-mail in Decemberof 2019, from Wahle, 
 containing useful metadata:
 "Geomean and P90 Explanation.docx"
 
@@ -14,7 +14,7 @@ needs, and in particular, that the mapped p90 values released each year were
 based on the most recent 30 observations at each site, which extend over
 multiple years.  Thus the annual "p90" data are not sequentially independent.
 
-We ended up using the "p90" data principally for it's geographic content. 
+We ended up using the "p90" data principally for it's geographic content.
 Data was accessed as follows:
 
 ## "Public" 2018 "P90" data
@@ -51,7 +51,7 @@ on this API is available here: https://www.ncdc.noaa.gov/cdo-web/webservices/v2
 Documentation on specific datasets is available at
 https://www.ncdc.noaa.gov/cdo-web/datasets
 
-Portland Jetport weather data was  downloaded by Curtis C. Bohlen using a custom
+Portland Jetport weather data was downloaded by Curtis C. Bohlen using a custom
 python script, titled "noaaweatherdataGUI.py" on April 23, 2020, when analyzing 
 Long Creek Watershed Management District data.  The version of the data included 
 here was derived from that download by selecting data from the years 2015 through
@@ -59,9 +59,9 @@ here was derived from that download by selecting data from the years 2015 throug
 
 ## Units
 Data is in SI units, except that NOAA provides some data in tenths of the
-nominal units.  This is not well documented through the API, but obvious in 
+nominal units. This is not well documented through the API, but obvious in 
 context. Temperatures are reported in tenths of degrees C, and precipitation in
-tenths of a millimeter.  For this analysis, we disregard trace rainfall.
+tenths of a millimeter. For this analysis, we disregard trace rainfall.
 
 # Growing Areas
 The shapefile `MaineDMR_Public_Health_-_Current_NSSP_Classifications-shp` was 

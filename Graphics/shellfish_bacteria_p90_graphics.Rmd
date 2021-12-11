@@ -124,6 +124,7 @@ coli_data <- coli_data %>%
 We have some data that was selected for stations outside of Casco Bay. To be  
 careful, we  remove sampling data for any site in th two adjacent Growing Areas,
 "WH" and "WM".
+
 ```{r}
 coli_data <- coli_data %>%
   filter(GROW_AREA != 'WH' & GROW_AREA != "WM") %>%
@@ -133,6 +134,7 @@ coli_data <- coli_data %>%
 
 ## Weather Data
 We simplify the weather data somewhat.
+
 ```{r load_weather_data}
 sibfldnm    <- 'Original_Data'
 parent      <- dirname(getwd())
@@ -187,6 +189,7 @@ coli_data <- coli_data %>%
 
 ## Summary Statistics Dataframe
 We only work with the raw observed summary statistics here.
+
 ```{r}
 sum_data <- coli_data %>%
   mutate(logcoli = log(ColiVal),
@@ -219,6 +222,7 @@ This is a general function, so needs to be passed log transformed data to
 produce geometric means.  note that we can substitute another function for the 
 mean to generate confidence intervals for other statistics, here the 90th
 percentile.
+
 ```{r bootstrap_ci}
 boot_one <- function (dat, fun = "mean", sz = 1000, width = 0.95) {
   
@@ -236,6 +240,7 @@ boot_one <- function (dat, fun = "mean", sz = 1000, width = 0.95) {
 ## Confidence Intervals for the Geometric Mean
 We need to first calculate confidence intervals on a log scale, then build a
 tibble and back transform them.
+
 ```{r}
 gm_ci <- tapply(log(coli_data$ColiVal), coli_data$Station, boot_one)
 
@@ -252,7 +257,6 @@ gm_ci <- gm_ci %>%
          gm_upper1 = exp(gm_upper1))
 ```
 
-
 ## Confidence Intervals for the 90th Percentile
 Because we use `eval()` and call()` inside the `boot_one()` function, we need to
 pass the function we want to bootstrap as a string. We can't pass in an
@@ -268,6 +272,7 @@ far simpler to write a named function rather than revise and generalize the
 `boot_one()` function.  Besides, there are good packages to support
 bootstrapping available.  If we needed a more capable bootstrap function, we 
 would have used the `boot` package.
+
 ```{r}
 p90 <- function(.x) quantile(.x, 0.9)
 ```
@@ -287,6 +292,7 @@ p90_ci <- as.data.frame(do.call(rbind, p90_ci)) %>%
 ## Combining Results
 We add results to the summary data. (Because this uses `left_join()`, rerunning
 it without deleting the old versions will generate errors in later steps.)
+
 ```{r}
 sum_data <-  sum_data %>% 
   left_join(gm_ci, by = 'Station') %>%
@@ -368,16 +374,20 @@ So just about 20% of sites fail the p90 "Accepted" threshold.
 ### Assemble Long Data
 ```{r}
 long_dat <- sum_data %>%
-  select(Station, gmean1, gm_lower1, gm_upper1, p901, p90_lower1, p90_upper1) %>%
+  select(Station, gmean1, gm_lower1, gm_upper1,
+         p901, p90_lower1, p90_upper1) %>%
   rename(gm_value = gmean1, p90_value = p901) %>%
   rename_with( ~sub('1', '', .x)) %>%
   pivot_longer(gm_value:p90_upper,
                names_to = c('parameter', 'type'), 
                names_sep = '_') %>%
-  pivot_wider(c(Station, parameter), names_from = type, values_from = value) %>%
+  pivot_wider(c(Station, parameter), 
+              names_from = type, 
+              values_from = value) %>%
   mutate(parameter = factor(parameter, 
                             levels = c('gm', 'p90'), 
-                            labels = c('Geometric Mean', '90th Percentile'))) %>%
+                            labels = c('Geometric Mean', 
+                                       '90th Percentile'))) %>%
   arrange(parameter, Station)
 ```
 
@@ -563,6 +573,7 @@ geometric mean.  However the `quantile()` function finds (and plots) the 90th
 percentile of the LOG of the data, rather than the log transform of the 90th
 percentile of the untransformed data.  Given the abundance of data here, that 
 makes no practical difference in a graphic.
+
 ```{r time_plot}
 plt <- ggplot(coli_data, aes(YEAR, ColiVal)) +
   geom_jitter(aes(color = LCFlag), alpha = 0.25, height = 0.05, width = 0.4) +
@@ -603,5 +614,4 @@ plt <- ggplot(coli_data, aes(YEAR, ColiVal)) +
 
 ggsave('figures/years.pdf', device = cairo_pdf, 
        width = 5, height = 4)
-
 ```

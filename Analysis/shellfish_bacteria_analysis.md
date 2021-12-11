@@ -46,7 +46,6 @@ Curtis C. Bohlen, Casco Bay Estuary Partnership.
         -   [Results](#results-1)
         -   [Graphic](#graphic-6)
     -   [Full Seasonal (DOY) model](#full-seasonal-doy-model)
-        -   [Graphic](#graphic-7)
     -   [Pareto Models](#pareto-models)
     -   [Nonparametric Tests](#nonparametric-tests)
         -   [Pairwise Wilcoxon test](#pairwise-wilcoxon-test)
@@ -72,7 +71,7 @@ elevated bacteria levels. Here we follow a strategy used in looking at
 the Beaches data, of looking at several imperfect modeling strategies to
 examine patterns.
 
-Another notebook will directly address modeling of exceedences of
+Another notebook will directly address modeling of exceedances of
 relevant standards. Here we focus on site to site variation, and
 relationships to a few covariates.
 
@@ -112,16 +111,18 @@ Also note that this standard is written in terms of “enterococci”, not
 ``` r
 library(readr)
 library(fitdistrplus)  # For cullen-fray graph etc.
+#> Warning: package 'fitdistrplus' was built under R version 4.0.5
 #> Loading required package: MASS
 #> Loading required package: survival
 
 library(tidyverse)  # Loads another `select()`
 #> Warning: package 'tidyverse' was built under R version 4.0.5
 #> -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
-#> v ggplot2 3.3.3     v dplyr   1.0.6
-#> v tibble  3.1.2     v stringr 1.4.0
-#> v tidyr   1.1.3     v forcats 0.5.1
+#> v ggplot2 3.3.5     v dplyr   1.0.7
+#> v tibble  3.1.6     v stringr 1.4.0
+#> v tidyr   1.1.4     v forcats 0.5.1
 #> v purrr   0.3.4
+#> Warning: package 'ggplot2' was built under R version 4.0.5
 #> Warning: package 'tidyr' was built under R version 4.0.5
 #> Warning: package 'dplyr' was built under R version 4.0.5
 #> Warning: package 'forcats' was built under R version 4.0.5
@@ -131,6 +132,7 @@ library(tidyverse)  # Loads another `select()`
 #> x dplyr::select() masks MASS::select()
 
 library(emmeans)   # For marginal means
+#> Warning: package 'emmeans' was built under R version 4.0.5
 
 library(VGAM)      # For Pareto GLMs and estimation.
 #> Loading required package: stats4
@@ -148,7 +150,7 @@ library(mgcv)      # For GAMs, here used principally for hierarchical models
 #> The following object is masked from 'package:dplyr':
 #> 
 #>     collapse
-#> This is mgcv 1.8-35. For overview type 'help("mgcv-package")'.
+#> This is mgcv 1.8-38. For overview type 'help("mgcv-package")'.
 #> 
 #> Attaching package: 'mgcv'
 #> The following object is masked from 'package:VGAM':
@@ -229,7 +231,7 @@ ggplot(coli_data, aes(x = ColiVal, y = ColiVal_ml, color = LCFlag)) +
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/plot_censored-1.png" style="display: block; margin: auto;" />
 
-Almost all censored values were at 2
+Almost all censored values were at 2.
 
 ``` r
 coli_data %>%
@@ -237,7 +239,7 @@ coli_data %>%
   pull(ColiVal_ml) %>%
   summary
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>  0.5398  0.6003  0.6117  0.6117  0.6233  0.6752
+#>  0.5454  0.5997  0.6112  0.6112  0.6228  0.6751
 ```
 
 So, our (lognormal) based estimator for censored values estimates a
@@ -346,6 +348,7 @@ ggplot(coli_data, aes(ColiVal_ml)) +
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/histogram-1.png" style="display: block; margin: auto;" />
+
 As for the Beaches data:  
 1. Non detects are highly abundant.  
 2. Violations of standards are relatively rare.
@@ -372,6 +375,7 @@ ggplot(coli_data, aes(ColiVal_ml)) +
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/histogram_double_log-1.png" style="display: block; margin: auto;" />
+
 And that looks very much like a linear relationship on a log-log plot,
 suggesting a gamma or Pareto distribution is appropriate. Prior
 exploratory analysis suggests a Pareto Distribution is better, but that
@@ -386,7 +390,7 @@ parms <- exp(coef(paretofit))
 names(parms) <- c('Scale', 'Shape')
 parms
 #>     Scale     Shape 
-#> 1.3910944 0.9278738
+#> 1.3897714 0.9275581
 #predict(paretofit, newdata = data.frame(x = 1))
 ```
 
@@ -471,12 +475,12 @@ cat('\nNon-detects at maximum likelihood estimator\n')
 #> Non-detects at maximum likelihood estimator
 summary(coli_data$ColiVal_ml)
 #>      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-#>    0.5398    0.6099    0.6355   16.3188    4.0000 1600.0000
+#>    0.5454    0.6093    0.6349   16.3186    4.0000 1600.0000
 cat('\n     Geometric Mean\n')
 #> 
 #>      Geometric Mean
 exp(mean(log(coli_data$ColiVal_ml)))
-#> [1] 1.887795
+#> [1] 1.886987
 ```
 
 Note that the medians are right at the detection limits (or our
@@ -535,8 +539,7 @@ plt <- ggplot(sum_data, aes(gmean2, Station)) +
                                   color = 'gray85'),
         panel.grid.major.x = element_line(size = 0.5, 
                                           color = 'gray85', 
-                                          linetype = 2)) 
-
+                                          linetype = 2))
 plt
 ```
 
@@ -572,6 +575,7 @@ plot(test_lm)
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/plot_simple_lm-1.png" style="display: block; margin: auto;" /><img src="shellfish_bacteria_analysis_files/figure-gfm/plot_simple_lm-2.png" style="display: block; margin: auto;" /><img src="shellfish_bacteria_analysis_files/figure-gfm/plot_simple_lm-3.png" style="display: block; margin: auto;" /><img src="shellfish_bacteria_analysis_files/figure-gfm/plot_simple_lm-4.png" style="display: block; margin: auto;" />
+
 The model fails to address extreme values. You see clear relationships
 between location and scale. Some of the pattern reflects the discrete
 nature of the lower observations. A better model might need t explicitly
@@ -583,8 +587,8 @@ anova(test_lm)
 #> 
 #> Response: log(ColiVal_ml)
 #>             Df  Sum Sq Mean Sq F value    Pr(>F)    
-#> Station    237  2683.8 11.3239  5.2095 < 2.2e-16 ***
-#> Residuals 9161 19913.3  2.1737                      
+#> Station    237  2686.6 11.3360  5.2134 < 2.2e-16 ***
+#> Residuals 9161 19919.8  2.1744                      
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -595,7 +599,7 @@ We have a significant challenge here figuring out how to address or even
 display what are essentially thousands of pairwise comparisons. We use
 `emmeans()` as a convenient way to extract station by station estimates
 and standard errors. We use `type = 'response'` to generate estimated
-geometric means an 95% confidence intervals.
+geometric means and 95% confidence intervals.
 
 ``` r
 emms <- summary(emmeans(test_lm, "Station", type = 'response')) %>%
@@ -626,11 +630,11 @@ plt <- ggplot(emms, aes(geom_mean, Station)) +
         panel.grid.major.x = element_line(size = 0.5, 
                                           color = 'gray85', 
                                           linetype = 2)) 
-
 plt
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/plot_lm_emms-1.png" style="display: block; margin: auto;" />
+
 So only one site has estimated long-term geometric mean that exceeds the
 geometric mean standard between
 
@@ -678,18 +682,18 @@ anova(rain_lm_1, rain_lm_2, rain_lm_3, rain_lm_4, rain_lm_5)
 #> Model 4: log(ColiVal_ml) ~ Station + Log1Precip + Log1Precip_d1
 #> Model 5: log(ColiVal_ml) ~ Station + Log1Precip + Log1Precip_d1 + Log1Precip_d2
 #>   Res.Df   RSS Df Sum of Sq        F Pr(>F)    
-#> 1   9158 19260                                 
-#> 2   9158 18877  0    382.56                    
-#> 3   9158 19879  0  -1001.42                    
-#> 4   9157 18334  1   1544.83 771.7224 <2e-16 ***
-#> 5   9156 18328  1      5.24   2.6175 0.1057    
+#> 1   9158 19266                                 
+#> 2   9158 18884  0    382.21                    
+#> 3   9158 19885  0  -1001.32                    
+#> 4   9157 18340  1   1544.97 771.5265 <2e-16 ***
+#> 5   9156 18335  1      5.25   2.6224 0.1054    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 rm(rain_lm_1, rain_lm_2, rain_lm_3, rain_lm_4, rain_lm_5)
 ```
 
 Rainfall is highly significant. The best single predictor is based on
-the previous day’s rainfall 9Model 2) adding the current day’s rainfall
+the previous day’s rainfall (Model 2) adding the current day’s rainfall
 helps a bit more. Including the current day’s rainfall also helps. but
 the reduction in sums of squares.
 
@@ -701,8 +705,8 @@ rain_lm <- lm(log(ColiVal_ml) ~ Station + Log1Precip +
 ``` r
 summary(rain_lm)$coefficients[239:240,]
 #>                Estimate Std. Error  t value      Pr(>|t|)
-#> Log1Precip    0.2335911 0.01417886 16.47461  4.073075e-60
-#> Log1Precip_d1 0.3145405 0.01462607 21.50546 4.033035e-100
+#> Log1Precip    0.2336436 0.01418131 16.47546  4.017420e-60
+#> Log1Precip_d1 0.3145233 0.01462860 21.50058 4.458304e-100
 ```
 
 So conditions are more dependent on the prior day’s rainfall.
@@ -760,6 +764,7 @@ plt +
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/plot_rain_lm_emms_plus-1.png" style="display: block; margin: auto;" />
+
 The match is not perfect anymore, as expected since the MLEs now are
 corrected for recent rainfall, but the correlation is close. Note that
 the confidence intervals are wider than the scatter among geometric
@@ -814,7 +819,7 @@ We found, however, that the gamma GLM can not readily handle the log of
 our count data if we replace our non-detects by the value 1 (which is
 half the reporting limit). The reason, of course, is that `log(1) == 0`,
 and the canonical link function for a gamma GLM is the inverse, so the
-value of 1 returns an infinite link function, making teh GLM model
+value of 1 returns an infinite link function, making the GLM model
 unstable. Even when we replace `ND <- 1` with `ND <- 1.1`, the GLM has
 trouble fitting some fairly simple models.
 
@@ -839,6 +844,7 @@ boot::glm.diag.plots(gamma_glm)
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/diagnostics_gamma_glm-1.png" style="display: block; margin: auto;" />
+
 That addresses the extreme values more successfully than our linear
 models, but not entirely. The scale-location relationship remains, but
 has been reduced in importance and partially reversed.
@@ -876,6 +882,7 @@ plt
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/plot_glm_emms-1.png" style="display: block; margin: auto;" />
+
 Qualitatively, that is similar to results from the linear model, with
 confidence intervals that scale with the geometric means, which makes
 sense both with these data and with a gamma model.
@@ -889,11 +896,12 @@ plt +
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/plot_glm_emms_plus-1.png" style="display: block; margin: auto;" />
-So the the predicted values still match the observed geometric means.
-Note that these geometric means are slightly higher than the ones
-produced by fitting our non-detect corrected data, or fitting the
-version with non-detects scaled to half the nominal reporting limit,
-since we are replacing the non-detects with their reporting limits here.
+
+So the predicted values still match the observed geometric means. Note
+that these geometric means are slightly higher than the ones produced by
+fitting our non-detect corrected data, or fitting the version with
+non-detects scaled to half the nominal reporting limit, since we are
+replacing the non-detects with their reporting limits here.
 
 ## Inverse Gaussian GLM
 
@@ -932,6 +940,7 @@ boot::glm.diag.plots(rain_glm)
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/diagnostics_rain_glm-1.png" style="display: block; margin: auto;" />
+
 That leaves us with a distribution of residuals with a light lower tail,
 but we also create some moderately high leverage values, and increase a
 few elevated residuals. Judging by what we saw in the Beaches data,
@@ -991,11 +1000,11 @@ plt <- ggplot(emms2, aes(geom_mean, Station)) +
         panel.grid.major.x = element_line(size = 0.5, 
                                           color = 'gray85', 
                                           linetype = 2)) 
-
 plt
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/plot_rain_gam_emms-1.png" style="display: block; margin: auto;" />
+
 Qualitatively, that is similar to results from the prior model.
 
 ``` r
@@ -1057,6 +1066,7 @@ plot(grow_gam)
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/plot_grow_gam-1.png" style="display: block; margin: auto;" />
+
 This plot shows the magnitude of the random effects. IDeally, these
 residuals should be close to normally distributed. here we note that
 they are somewhat skewed, but not excessively so.
@@ -1192,6 +1202,7 @@ plot(month_gam)
 ```
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/diagnostics_month_gam-1.png" style="display: block; margin: auto;" />
+
 The random effects are again skewed.
 
 ``` r
@@ -1300,7 +1311,6 @@ plt <- ggplot(emms4, aes(Month, geom_mean)) +
   
   theme_cbep(base_size = 12) +
   theme(legend.position = 'bottom')
-
 plt
 ```
 
@@ -1406,43 +1416,9 @@ ggplot(coli_data, aes(DOY, ColiVal)) +
 
 <img src="shellfish_bacteria_analysis_files/figure-gfm/plot_doy_gam_predicts-1.png" style="display: block; margin: auto;" />
 
-``` r
-emms5 <- summary(emmeans(doy_gam, 
-                         'DOY', at = list(DOY = 1:365),
-                         type = 'response'))%>%
-  rename(geom_mean = response) %>%
-  as_tibble()
-```
-
-### Graphic
-
-``` r
-plt <- ggplot(emms5, aes(DOY, geom_mean)) + 
-  geom_jitter(data = coli_data, mapping = aes(x = DOY, 
-                                             y = ColiVal,
-                                             color = LCFlag),
-              alpha = 0.25) +
-  geom_line(aes(x = as.numeric(DOY)), color = 'red', size = 1) +
-  geom_linerange(aes(ymin = lower.CL, ymax = upper.CL),
-                  color = 'red', size = .25, alpha = 0.25) +
- 
-  scale_y_log10() +
-  scale_color_manual(values = cbep_colors(), name = '', 
-                     labels = c('Observed', 'Below Detection')) +
-  ylab('Fecal Coliforms \n(CFU / 100ml)') +
-  xlab('Day of the Year') +
-  
-  theme_cbep(base_size = 12) +
-  theme(legend.position = 'bottom')
-
-plt
-```
-
-<img src="shellfish_bacteria_analysis_files/figure-gfm/plot_doy_emms-1.png" style="display: block; margin: auto;" />
-
 ## Pareto Models
 
-We were unable to run a Pareto models successfully under `VGAM`.
+We were unable to run a Pareto model successfully under `VGAM`.
 
 ``` r
 tmp <- coli_data %>%
@@ -1467,7 +1443,7 @@ kruskal.test(ColiVal_ml ~ Station, data = coli_data)
 #>  Kruskal-Wallis rank sum test
 #> 
 #> data:  ColiVal_ml by Station
-#> Kruskal-Wallis chi-squared = 887.11, df = 237, p-value < 2.2e-16
+#> Kruskal-Wallis chi-squared = 908.93, df = 237, p-value < 2.2e-16
 ```
 
 Although the Kruskal-Wallis test is not strictly a comparison of
@@ -1521,7 +1497,7 @@ res <- suppressWarnings(
 
 Differences among sites are statistically meaningful, but pairwise
 comparisons are too numerous to be especially informative. Some sites
-differ from others, but other than the
+differ from others, but other than that, it’s hard to summarize.
 
 # Output Table for GIS
 
